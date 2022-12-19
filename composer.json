@@ -34,8 +34,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Datomatic\\ActiveCampaign\\": "src",
-            "Datomatic\\ActiveCampaign\\Database\\Factories\\": "database/factories"
+            "Datomatic\\ActiveCampaign\\": "src"
         }
     },
     "autoload-dev": {
