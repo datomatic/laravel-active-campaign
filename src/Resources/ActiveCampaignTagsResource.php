@@ -2,7 +2,6 @@
 
 namespace Datomatic\ActiveCampaign\Resources;
 
-use Datomatic\ActiveCampaign\ActiveCampaignResource;
 use Datomatic\ActiveCampaign\Enums\Method;
 use Datomatic\ActiveCampaign\Exceptions\ActiveCampaignException;
 use Illuminate\Support\Collection;

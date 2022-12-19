@@ -1,6 +1,6 @@
 <?php
 
-namespace Datomatic\ActiveCampaign;
+namespace Datomatic\ActiveCampaign\Resources;
 
 use Datomatic\ActiveCampaign\Contracts\ActiveCampaignClientContract;
 use Datomatic\ActiveCampaign\Contracts\ActiveCampaignResourceContract;
