@@ -3,7 +3,7 @@
 namespace Datomatic\ActiveCampaign;
 
 use Datomatic\ActiveCampaign\Contracts\ActiveCampaignClientContract;
-use Datomatic\ActiveCampaign\Factory\ActiveCampaignClientFactory;
+use Datomatic\ActiveCampaign\Factories\ActiveCampaignClientFactory;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 

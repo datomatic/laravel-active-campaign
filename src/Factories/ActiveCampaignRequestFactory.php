@@ -1,6 +1,6 @@
 <?php
 
-namespace Datomatic\ActiveCampaign\Factory;
+namespace Datomatic\ActiveCampaign\Factories;
 
 use Datomatic\ActiveCampaign\Support\ActiveCampaignConfig;
 use Illuminate\Http\Client\PendingRequest;
