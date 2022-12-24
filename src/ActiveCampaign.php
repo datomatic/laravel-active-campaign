@@ -3,6 +3,7 @@
 namespace Datomatic\ActiveCampaign;
 
 use Datomatic\ActiveCampaign\Resources\ActiveCampaignContactsResource;
+use Datomatic\ActiveCampaign\Resources\ActiveCampaignFieldsResource;
 use Datomatic\ActiveCampaign\Resources\ActiveCampaignFieldValuesResource;
 use Datomatic\ActiveCampaign\Resources\ActiveCampaignTagsResource;
 

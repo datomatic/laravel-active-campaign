@@ -5,7 +5,7 @@ namespace Datomatic\ActiveCampaign\Resources;
 use Datomatic\ActiveCampaign\Exceptions\ActiveCampaignException;
 use Illuminate\Http\Client\RequestException;
 
-class ActiveCampaignFieldResource extends ActiveCampaignResource
+class ActiveCampaignFieldsResource extends ActiveCampaignResource
 {
     protected string $resourceBasePath = 'fields';
 
