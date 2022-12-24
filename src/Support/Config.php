@@ -6,11 +6,11 @@ use Datomatic\ActiveCampaign\Exceptions\InvalidConfig;
 
 abstract class Config
 {
-    protected static function getParam(string $param, ?callable $function = null): mixed
+    protected static function getParam(string $paramName, ?callable $function = null): mixed
     {
-        $param = config('active-campaign.'.$param);
+        $param = config('active-campaign.'.$paramName);
 
-        throw_if(empty($param), InvalidConfig::missingParam($param));
+        throw_if(empty($param), InvalidConfig::missingParam($paramName));
 
         if (! is_null($function)) {
             $function($param);

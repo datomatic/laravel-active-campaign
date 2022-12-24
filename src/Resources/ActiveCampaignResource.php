@@ -30,7 +30,6 @@ abstract class ActiveCampaignResource implements ActiveCampaignResourceContract
      */
     public function request(Method $method, ?string $path = null, array $options = [], ?string $responseKey = null): array
     {
-        echo $path;
         /** @var Response $response */
         $response = $this->client()->send(
             method: $method,
