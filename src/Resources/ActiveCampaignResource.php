@@ -16,8 +16,7 @@ abstract class ActiveCampaignResource implements ActiveCampaignResourceContract
 
     public function __construct(
         private readonly ActiveCampaignClientContract $client,
-    )
-    {
+    ) {
     }
 
     public function client(): ActiveCampaignClientContract
@@ -54,7 +53,7 @@ abstract class ActiveCampaignResource implements ActiveCampaignResourceContract
     {
         $contacts = $this->request(
             method: Method::GET,
-            path: $this->resourceBasePath . '?' . $query,
+            path: $this->resourceBasePath.'?'.$query,
             responseKey: 'contacts'
         );
 
@@ -86,7 +85,7 @@ abstract class ActiveCampaignResource implements ActiveCampaignResourceContract
     {
         $contact = $this->request(
             method: Method::GET,
-            path: $this->resourceBasePath . '/' . $id,
+            path: $this->resourceBasePath.'/'.$id,
         );
 
         return $this->responseCast($contact);
@@ -101,7 +100,7 @@ abstract class ActiveCampaignResource implements ActiveCampaignResourceContract
     {
         $contact = $this->request(
             method: Method::PUT,
-            path: $this->resourceBasePath . '/' . $id,
+            path: $this->resourceBasePath.'/'.$id,
             options: $this->requestCast($data),
         );
 
@@ -117,7 +116,7 @@ abstract class ActiveCampaignResource implements ActiveCampaignResourceContract
     {
         $this->request(
             method: Method::DELETE,
-            path: $this->resourceBasePath . '/' . $id
+            path: $this->resourceBasePath.'/'.$id
         );
     }
 
@@ -130,5 +129,4 @@ abstract class ActiveCampaignResource implements ActiveCampaignResourceContract
     {
         return $request;
     }
-
 }
