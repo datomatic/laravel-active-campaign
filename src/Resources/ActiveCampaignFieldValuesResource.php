@@ -2,7 +2,6 @@
 
 namespace Datomatic\ActiveCampaign\Resources;
 
-use Datomatic\ActiveCampaign\Enums\Method;
 use Datomatic\ActiveCampaign\Exceptions\ActiveCampaignException;
 use Illuminate\Http\Client\RequestException;
 
@@ -39,7 +38,7 @@ class ActiveCampaignFieldValuesResource extends ActiveCampaignResource
 
     protected function requestCast(array $request): array
     {
-        return [ 'fieldValue' => $request];
+        return ['fieldValue' => $request];
     }
 
     protected function responseCast(array $response): array

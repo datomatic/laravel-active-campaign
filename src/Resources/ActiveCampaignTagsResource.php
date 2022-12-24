@@ -2,9 +2,8 @@
 
 namespace Datomatic\ActiveCampaign\Resources;
 
-use Datomatic\ActiveCampaign\Enums\Method;
 use Datomatic\ActiveCampaign\Exceptions\ActiveCampaignException;
-use Illuminate\Support\Collection;
+use Illuminate\Http\Client\RequestException;
 
 class ActiveCampaignTagsResource extends ActiveCampaignResource
 {
@@ -13,13 +12,13 @@ class ActiveCampaignTagsResource extends ActiveCampaignResource
     /**
      * Create a tag
      *
-     * @throws ActiveCampaignException
+     * @throws ActiveCampaignException|RequestException
      */
-    public function createTag(string $name, string $description = ''): string
+    public function createTag(string $name, string $description = ''): array
     {
         return parent::create([
             'tag' => $name,
-            'description' => $description
+            'description' => $description,
         ]);
     }
 
@@ -28,22 +27,23 @@ class ActiveCampaignTagsResource extends ActiveCampaignResource
      *
      * @return array
      *
-     * @throws ActiveCampaignException
+     * @throws ActiveCampaignException|RequestException
      */
     public function updateTag(int $tagId, string $name, string $description = ''): array
     {
         return parent::update($tagId, [
             'tag' => $name,
-            'description' => $description
+            'description' => $description,
         ]);
     }
 
     protected function requestCast(array $request): array
     {
         $request = ['tag' => $request];
-        if (!isset($request['tag']['tagType'])) {
+        if (! isset($request['tag']['tagType'])) {
             $request['tag']['tagType'] = 'contact';
         }
+
         return $request;
     }
 

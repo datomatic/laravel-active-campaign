@@ -6,15 +6,10 @@ use Datomatic\ActiveCampaign\Enums\Method;
 use Datomatic\ActiveCampaign\Exceptions\ActiveCampaignException;
 use Datomatic\ActiveCampaign\Support\ActiveCampaignConfig;
 use Illuminate\Http\Client\RequestException;
-use Illuminate\Support\Collection;
 
 class ActiveCampaignContactsResource extends ActiveCampaignResource
 {
     protected string $resourceBasePath = 'contacts';
-
-
-
-
 
     /**
      * Sync an existing contact without passing id.
@@ -26,15 +21,11 @@ class ActiveCampaignContactsResource extends ActiveCampaignResource
         $contact = $this->request(
             method: Method::POST,
             path: 'contacts/sync',
-            options: [
-                'contact' => $this->requestCast($contactArray),
-            ],
+            options: $this->requestCast($contactArray),
         );
 
         return $this->responseCast($contact);
     }
-
-
 
     /**
      * Get a contactTags list of a contact.
@@ -130,7 +121,7 @@ class ActiveCampaignContactsResource extends ActiveCampaignResource
         return $requestArray;
     }
 
-    protected function responseCast(array $response)
+    protected function responseCast(array $response): array
     {
         $responseCast = $response['contact'];
 
