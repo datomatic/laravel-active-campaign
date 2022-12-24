@@ -18,6 +18,12 @@ class ActiveCampaign
         return new ActiveCampaignFieldValuesResource($this);
     }
 
+
+    public function fields(): ActiveCampaignFieldsResource
+    {
+        return new ActiveCampaignFieldsResource($this);
+    }
+
     public function tags(): ActiveCampaignTagsResource
     {
         return new ActiveCampaignTagsResource($this);
