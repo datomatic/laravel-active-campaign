@@ -6,9 +6,9 @@ use Datomatic\ActiveCampaign\Enums\Method;
 use Datomatic\ActiveCampaign\Exceptions\ActiveCampaignException;
 use Illuminate\Http\Client\RequestException;
 
-class ActiveCampaignFieldValuesResource extends ActiveCampaignResource
+class ActiveCampaignFieldResource extends ActiveCampaignResource
 {
-    protected string $resourceBasePath = 'fieldValues';
+    protected string $resourceBasePath = 'fields';
 
     /**
      * Create a field value type safe.
@@ -16,7 +16,7 @@ class ActiveCampaignFieldValuesResource extends ActiveCampaignResource
      * @throws ActiveCampaignException
      * @throws RequestException
      */
-    public function createFieldValue(int $field, string $value): array
+    public function createField(int $field, string $value): array
     {
         return parent::create([
             'field' => $field,
@@ -39,14 +39,12 @@ class ActiveCampaignFieldValuesResource extends ActiveCampaignResource
 
     protected function requestCast(array $request): array
     {
-        return [ 'fieldValue' => $request];
+        return [ 'field' => $request];
     }
 
     protected function responseCast(array $response): array
     {
-        $responseCast = $response['fieldValue'];
-
-        unset($responseCast['links']);
+        $responseCast = $response['field'];
 
         return $responseCast;
     }

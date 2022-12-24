@@ -2,40 +2,52 @@
 
 namespace Datomatic\ActiveCampaign\Resources;
 
-use Datomatic\ActiveCampaign\Contracts\ActiveCampaignClientContract;
-use Datomatic\ActiveCampaign\Contracts\ActiveCampaignResourceContract;
 use Datomatic\ActiveCampaign\Enums\Method;
 use Datomatic\ActiveCampaign\Exceptions\ActiveCampaignException;
 use Illuminate\Http\Client\RequestException;
-use Illuminate\Http\Client\Response;
 
-abstract class ActiveCampaignResource implements ActiveCampaignResourceContract
+class ActiveCampaignFieldValuesResource extends ActiveCampaignResource
 {
-    public function __construct(
-        private readonly ActiveCampaignClientContract $client,
-    ) {
-    }
+    protected string $resourceBasePath = 'fieldValues';
 
-    public function client(): ActiveCampaignClientContract
+    /**
+     * Create a field value type safe.
+     *
+     * @throws ActiveCampaignException
+     * @throws RequestException
+     */
+    public function createFieldValue(int $id, int $field, string $value): array
     {
-        return $this->client;
+        return parent::create($id, [
+            'field' => $field,
+            'value' => $value,
+        ]);
     }
 
     /**
-     * @throws RequestException
-     * @throws ActiveCampaignException
+     * Update an existing field value type safe.
+     *
+     * @throws ActiveCampaignException|RequestException
      */
-    public function request(Method $method, ?string $path = null, array $options = [], ?string $responseKey = null): array
+    public function updateFieldValue(int $id, int $field, string $value): array
     {
-        /** @var Response $response */
-        $response = $this->client()->send(
-            method: $method->value,
-            url: $path,
-            options: $options
-        );
+        return parent::update($id, [
+            'field' => $field,
+            'value' => $value,
+        ]);
+    }
 
-        throw_if($response->failed(), ActiveCampaignException::requestError($path, $response->json()));
+    protected function requestCast(array $request): array
+    {
+        return [ 'fiedlValue' => $request];
+    }
 
-        return $response->json($responseKey);
+    protected function responseCast(array $response): array
+    {
+        $responseCast = $response['fieldValue'];
+
+        unset($responseCast['links']);
+
+        return $responseCast;
     }
 }

@@ -8,61 +8,19 @@ use Illuminate\Support\Collection;
 
 class ActiveCampaignTagsResource extends ActiveCampaignResource
 {
-    /**
-     * Retreive an existing tag by their id.
-     *
-     * @throws ActiveCampaignException|\Illuminate\Http\Client\RequestException
-     */
-    public function get(int $id): array
-    {
-        $tag = $this->request(
-            method: Method::GET,
-            path: 'tags/'.$id,
-            responseKey: 'tag'
-        );
-
-        return $this->responseArray($tag);
-    }
-
-    /**
-     * List all tags filtered by name
-     *
-     * @return Collection<int, array>
-     *
-     * @throws ActiveCampaignException|\Illuminate\Http\Client\RequestException
-     */
-    public function list(?string $name = ''): Collection
-    {
-        $tags = $this->request(
-            method: Method::GET,
-            path: 'tags?search='.$name,
-            responseKey: 'tags'
-        );
-
-        return collect($tags);
-    }
+    protected string $resourceBasePath = 'tags';
 
     /**
      * Create a tag
      *
      * @throws ActiveCampaignException
      */
-    public function create(string $name, string $description = ''): string
+    public function createTag(string $name, string $description = ''): string
     {
-        $tag = $this->request(
-            method: Method::POST,
-            path: 'tags',
-            options: [
-                'tag' => [
-                    'tag' => $name,
-                    'description' => $description,
-                    'tagType' => 'contact',
-                ],
-            ],
-            responseKey: 'tag'
-        );
-
-        return $this->responseArray($tag);
+        return parent::create([
+            'tag' => $name,
+            'description' => $description
+        ]);
     }
 
     /**
@@ -72,46 +30,29 @@ class ActiveCampaignTagsResource extends ActiveCampaignResource
      *
      * @throws ActiveCampaignException
      */
-    public function update(int $tagId, string $name, string $description = ''): array
+    public function updateTag(int $tagId, string $name, string $description = ''): array
     {
-        $tag = $this->request(
-            method: Method::PUT,
-            path: 'tags/'.$tagId,
-            options: [
-                'tag' => [
-                    'tag' => $name,
-                    'description' => $description,
-                    'tagType' => 'contact',
-                ],
-            ],
-            responseKey: 'tag'
-        );
-
-        return $this->responseArray($tag);
+        return parent::update($tagId, [
+            'tag' => $name,
+            'description' => $description
+        ]);
     }
 
-    /**
-     * Delete an existing tag by their id.
-     *
-     * @param  int  $id
-     * @return void
-     *
-     * @throws ActiveCampaignException
-     */
-    public function delete(int $id): void
+    protected function requestCast(array $request): array
     {
-        $this->request(
-            method: Method::DELETE,
-            path: 'tags/'.$id
-        );
+        $request = ['tag' => $request];
+        if (!isset($request['tag']['tagType'])) {
+            $request['tag']['tagType'] = 'contact';
+        }
+        return $request;
     }
 
-    protected function responseArray(array $response)
+    protected function responseCast(array $response): array
     {
-        $responseArray = $response['contact'];
+        $responseCast = $response['tag'];
 
-        unset($responseArray['links']);
+        unset($responseCast['links']);
 
-        return $responseArray;
+        return $responseCast;
     }
 }
