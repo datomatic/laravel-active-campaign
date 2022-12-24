@@ -6,10 +6,23 @@ use Datomatic\ActiveCampaign\Enums\Method;
 use Datomatic\ActiveCampaign\Exceptions\ActiveCampaignException;
 use Datomatic\ActiveCampaign\Support\ActiveCampaignConfig;
 use Illuminate\Http\Client\RequestException;
+use Illuminate\Support\Collection;
 
 class ActiveCampaignContactsResource extends ActiveCampaignResource
 {
     protected string $resourceBasePath = 'contacts';
+
+    /**
+     * List all contact, search contacts, or filter contacts by query defined criteria.
+     *
+     * @return Collection<int, array>
+     *
+     * @throws ActiveCampaignException|RequestException
+     */
+    public function list(?string $query = null, ?string $responseKey = null): Collection
+    {
+        return parent::list($query, 'contacts');
+    }
 
     /**
      * Sync an existing contact without passing id.
@@ -36,7 +49,7 @@ class ActiveCampaignContactsResource extends ActiveCampaignResource
     {
         $contactTags = $this->request(
             method: Method::GET,
-            path: 'contacts/'.$contactId.'/contactTags',
+            path: 'contacts/' . $contactId . '/contactTags',
             responseKey: 'contactTags'
         );
 
@@ -81,7 +94,7 @@ class ActiveCampaignContactsResource extends ActiveCampaignResource
         if ($contactTagId) {
             $this->request(
                 method: Method::DELETE,
-                path: 'contactTags/'.$contactTagId
+                path: 'contactTags/' . $contactTagId
             );
         } else {
             ActiveCampaignException::contactTagMissing($contactId, $tagId);
@@ -102,7 +115,7 @@ class ActiveCampaignContactsResource extends ActiveCampaignResource
     }
 
     /**
-     * @param  array  $contactRequest
+     * @param array $contactRequest
      * @return mixed[]
      */
     protected function requestCast(array $contactRequest): array
@@ -112,8 +125,8 @@ class ActiveCampaignContactsResource extends ActiveCampaignResource
         $requestArray = [];
         $requestArray['contact'] = collect($contactRequest)->only(['email', 'firstName', 'lastName', 'phone'])->toArray();
         $requestArray['fieldValues'] = collect(ActiveCampaignConfig::customFields())
-            ->filter(fn ($customFieldId, $customFieldName) => ! empty($contactRequest[$customFieldName]))
-            ->map(fn ($customFieldId, $customFieldName) => [
+            ->filter(fn($customFieldId, $customFieldName) => !empty($contactRequest[$customFieldName]))
+            ->map(fn($customFieldId, $customFieldName) => [
                 'field' => strval($customFieldId),
                 'value' => $contactRequest[$customFieldName],
             ])->all();
@@ -128,7 +141,7 @@ class ActiveCampaignContactsResource extends ActiveCampaignResource
         unset($responseCast['links']);
 
         $customFields = ActiveCampaignConfig::customFields();
-        if (! empty($customFields)) {
+        if (!empty($customFields)) {
             $customFieldNames = array_flip($customFields);
             foreach ($response['fieldValues'] as $customField) {
                 $customFieldId = intval($customField['field']);

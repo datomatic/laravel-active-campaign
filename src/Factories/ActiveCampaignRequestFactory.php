@@ -14,7 +14,7 @@ class ActiveCampaignRequestFactory
             'Api-Token' => ActiveCampaignConfig::apiKey(),
         ])
             ->acceptJson()
-            ->baseUrl(ActiveCampaignConfig::baseUrl())
+            ->baseUrl(ActiveCampaignConfig::baseUrl() . '/api/3')
             ->timeout(ActiveCampaignConfig::timeout())
             ->retry(ActiveCampaignConfig::retryTimes(), ActiveCampaignConfig::retrySleep());
     }

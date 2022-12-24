@@ -16,7 +16,8 @@ abstract class ActiveCampaignResource implements ActiveCampaignResourceContract
 
     public function __construct(
         private readonly ActiveCampaignClientContract $client,
-    ) {
+    )
+    {
     }
 
     public function client(): ActiveCampaignClientContract
@@ -30,9 +31,10 @@ abstract class ActiveCampaignResource implements ActiveCampaignResourceContract
      */
     public function request(Method $method, ?string $path = null, array $options = [], ?string $responseKey = null): array
     {
+        echo $path;
         /** @var Response $response */
         $response = $this->client()->send(
-            method: $method->value,
+            method: $method,
             url: $path,
             options: $options
         );
@@ -43,18 +45,18 @@ abstract class ActiveCampaignResource implements ActiveCampaignResourceContract
     }
 
     /**
-     * List all contact, search contacts, or filter contacts by query defined criteria.
+     * List all resources, search resources, or filter resources by query defined criteria.
      *
      * @return Collection<int, array>
      *
      * @throws ActiveCampaignException|RequestException
      */
-    public function list(string $query = ''): Collection
+    public function list(?string $query = null, ?string $responseKey = null): Collection
     {
         $contacts = $this->request(
             method: Method::GET,
-            path: $this->resourceBasePath.'?'.$query,
-            responseKey: 'contacts'
+            path: $this->resourceBasePath . ($query ? '?' . $query : ''),
+            responseKey: $responseKey
         );
 
         return collect($contacts);
@@ -85,7 +87,7 @@ abstract class ActiveCampaignResource implements ActiveCampaignResourceContract
     {
         $contact = $this->request(
             method: Method::GET,
-            path: $this->resourceBasePath.'/'.$id,
+            path: $this->resourceBasePath . '/' . $id,
         );
 
         return $this->responseCast($contact);
@@ -100,7 +102,7 @@ abstract class ActiveCampaignResource implements ActiveCampaignResourceContract
     {
         $contact = $this->request(
             method: Method::PUT,
-            path: $this->resourceBasePath.'/'.$id,
+            path: $this->resourceBasePath . '/' . $id,
             options: $this->requestCast($data),
         );
 
@@ -116,7 +118,7 @@ abstract class ActiveCampaignResource implements ActiveCampaignResourceContract
     {
         $this->request(
             method: Method::DELETE,
-            path: $this->resourceBasePath.'/'.$id
+            path: $this->resourceBasePath . '/' . $id
         );
     }
 

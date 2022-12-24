@@ -4,10 +4,21 @@ namespace Datomatic\ActiveCampaign\Resources;
 
 use Datomatic\ActiveCampaign\Exceptions\ActiveCampaignException;
 use Illuminate\Http\Client\RequestException;
+use Illuminate\Support\Collection;
 
 class ActiveCampaignFieldValuesResource extends ActiveCampaignResource
 {
     protected string $resourceBasePath = 'fieldValues';
+
+    /**
+     * @return Collection<int, array>
+     *
+     * @throws ActiveCampaignException|RequestException
+     */
+    public function list(?string $query = null, ?string $responseKey = null): Collection
+    {
+        return parent::list($query, 'fieldValues');
+    }
 
     /**
      * Create a field value type safe.

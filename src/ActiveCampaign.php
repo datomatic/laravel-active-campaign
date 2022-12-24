@@ -11,21 +11,21 @@ class ActiveCampaign
 {
     public function contacts(): ActiveCampaignContactsResource
     {
-        return new ActiveCampaignContactsResource($this);
+        return resolve(ActiveCampaignContactsResource::class);
     }
 
     public function fieldValues(): ActiveCampaignFieldValuesResource
     {
-        return new ActiveCampaignFieldValuesResource($this);
+        return resolve(ActiveCampaignFieldValuesResource::class);
     }
 
     public function fields(): ActiveCampaignFieldsResource
     {
-        return new ActiveCampaignFieldsResource($this);
+        return resolve(ActiveCampaignFieldsResource::class);
     }
 
     public function tags(): ActiveCampaignTagsResource
     {
-        return new ActiveCampaignTagsResource($this);
+        return resolve(ActiveCampaignTagsResource::class);
     }
 }

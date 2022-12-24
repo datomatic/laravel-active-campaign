@@ -4,10 +4,21 @@ namespace Datomatic\ActiveCampaign\Resources;
 
 use Datomatic\ActiveCampaign\Exceptions\ActiveCampaignException;
 use Illuminate\Http\Client\RequestException;
+use Illuminate\Support\Collection;
 
 class ActiveCampaignTagsResource extends ActiveCampaignResource
 {
     protected string $resourceBasePath = 'tags';
+
+    /**
+     * @return Collection<int, array>
+     *
+     * @throws ActiveCampaignException|RequestException
+     */
+    public function list(?string $query = null, ?string $responseKey = null): Collection
+    {
+        return parent::list($query, 'tags');
+    }
 
     /**
      * Create a tag
