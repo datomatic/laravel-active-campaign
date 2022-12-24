@@ -19,7 +19,6 @@ class ActiveCampaign
         return new ActiveCampaignFieldValuesResource($this);
     }
 
-
     public function fields(): ActiveCampaignFieldsResource
     {
         return new ActiveCampaignFieldsResource($this);
