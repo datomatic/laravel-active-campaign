@@ -11,10 +11,10 @@ class ActiveCampaignFieldsResource extends ActiveCampaignResource
     protected string $resourceBasePath = 'fields';
 
     /**
-    * @return Collection<int, array>
-    *
-    * @throws ActiveCampaignException|RequestException
-    */
+     * @return Collection<int, array>
+     *
+     * @throws ActiveCampaignException|RequestException
+     */
     public function list(?string $query = null, ?string $responseKey = null): Collection
     {
         return parent::list($query, 'fields');
