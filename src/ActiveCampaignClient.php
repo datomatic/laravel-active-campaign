@@ -19,7 +19,7 @@ class ActiveCampaignClient implements ActiveCampaignClientContract
         return $this->request->throw()->send(
             method: $method->value,
             url: $url,
-            options: [ 'json' => $data],
+            options: ['json' => $data],
         );
     }
 }
