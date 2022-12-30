@@ -14,12 +14,12 @@ class ActiveCampaignClient implements ActiveCampaignClientContract
     ) {
     }
 
-    public function send(Method $method, string $url, array $options = []): Response
+    public function send(Method $method, string $url, array $data = []): Response
     {
         return $this->request->throw()->send(
             method: $method->value,
             url: $url,
-            options: $options,
+            options: [ 'json' => $data],
         );
     }
 }

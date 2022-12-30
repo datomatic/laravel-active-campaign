@@ -13,7 +13,7 @@ abstract class Config
         throw_if(empty($param), InvalidConfig::missingParam($paramName));
 
         if (! is_null($function)) {
-            $function($param);
+            $function($param, $paramName);
         }
 
         return $param;
@@ -21,24 +21,22 @@ abstract class Config
 
     protected static function getStringParam(string $param): string
     {
-        return self::getParam($param, function (string $param) {
-            throw_if(! is_string($param), InvalidConfig::paramHasWrongType($param, 'string'));
+        return self::getParam($param, function (mixed $param, string $paramName) {
+            throw_if(! is_string($param), InvalidConfig::paramHasWrongType($paramName, 'string'));
         });
     }
 
     protected static function getIntParam(string $param): int
     {
-        return self::getParam($param, function (int $param) {
-            throw_if(! is_int($param), InvalidConfig::paramHasWrongType($param, 'string'));
+        return self::getParam($param, function (mixed $param, string $paramName) {
+            throw_if(! is_int($param), InvalidConfig::paramHasWrongType($paramName, 'integer'));
         });
     }
 
     protected static function getArrayParam(string $param): array
     {
-        $param = self::getParam($param);
-
-        throw_if(! is_array($param), InvalidConfig::paramHasWrongType($param, 'array'));
-
-        return $param;
+        return self::getParam($param, function (mixed $param, string $paramName) {
+            throw_if(! is_array($param), InvalidConfig::paramHasWrongType($paramName, 'array'));
+        });
     }
 }

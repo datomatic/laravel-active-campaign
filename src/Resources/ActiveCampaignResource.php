@@ -34,7 +34,7 @@ abstract class ActiveCampaignResource implements ActiveCampaignResourceContract
         $response = $this->client()->send(
             method: $method,
             url: $path,
-            options: $options
+            data: $options
         );
 
         throw_if($response->failed(), ActiveCampaignException::requestError($path, $response->json()));

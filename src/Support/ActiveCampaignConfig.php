@@ -16,7 +16,7 @@ class ActiveCampaignConfig extends Config
 
     public static function timeout(): string
     {
-        return self::getStringParam('timeout');
+        return self::getIntParam('timeout');
     }
 
     public static function retryTimes(): int

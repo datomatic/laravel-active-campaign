@@ -11,5 +11,5 @@ use Illuminate\Http\Client\Response;
  */
 interface ActiveCampaignClientContract
 {
-    public function send(Method $method, string $url, array $options = []): Response;
+    public function send(Method $method, string $url, array $data = []): Response;
 }
