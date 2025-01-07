@@ -10,7 +10,7 @@ abstract class Config
     {
         $param = config('active-campaign.'.$paramName);
 
-        throw_if(empty($param), InvalidConfig::missingParam($paramName));
+        throw_if(is_null($param), InvalidConfig::missingParam($paramName));
 
         if (! is_null($function)) {
             $function($param, $paramName);
