@@ -16,8 +16,7 @@ abstract class ActiveCampaignResource implements ActiveCampaignResourceContract
 
     public function __construct(
         private readonly ActiveCampaignClientContract $client,
-    ) {
-    }
+    ) {}
 
     public function client(): ActiveCampaignClientContract
     {

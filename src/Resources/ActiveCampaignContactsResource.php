@@ -115,7 +115,6 @@ class ActiveCampaignContactsResource extends ActiveCampaignResource
     }
 
     /**
-     * @param  array  $contactRequest
      * @return mixed[]
      */
     protected function requestCast(array $contactRequest): array
