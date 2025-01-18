@@ -6,7 +6,7 @@ class ActiveCampaignConfig extends Config
 {
     public static function baseUrl(): string
     {
-        return rtrim(self::getStringParam('base_url'),'/');
+        return rtrim(self::getStringParam('base_url'), '/');
     }
 
     public static function apiKey(): string
