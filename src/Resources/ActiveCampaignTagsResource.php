@@ -36,7 +36,6 @@ class ActiveCampaignTagsResource extends ActiveCampaignResource
     /**
      * Update an existing tag.
      *
-     * @return array
      *
      * @throws ActiveCampaignException|RequestException
      */

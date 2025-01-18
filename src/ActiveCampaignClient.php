@@ -11,8 +11,7 @@ class ActiveCampaignClient implements ActiveCampaignClientContract
 {
     public function __construct(
         private readonly PendingRequest $request,
-    ) {
-    }
+    ) {}
 
     public function send(Method $method, string $url, array $data = []): Response
     {
