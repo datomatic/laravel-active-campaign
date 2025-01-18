@@ -18,8 +18,7 @@ class ActiveCampaignServiceProvider extends PackageServiceProvider
          */
         $package
             ->name('laravel-active-campaign')
-            ->hasConfigFile()
-            ->hasViews();
+            ->hasConfigFile();
     }
 
     public function packageRegistered(): void
