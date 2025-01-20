@@ -11,10 +11,10 @@ use Illuminate\Support\Facades\Facade;
 /**
  * @see \Datomatic\ActiveCampaign\ActiveCampaign
  *
- * @method ActiveCampaignContactsResource contacts()
- * @method ActiveCampaignFieldValuesResource fieldValues()
- * @method ActiveCampaignFieldsResource fields()
- * @method ActiveCampaignTagsResource tags()
+ * @method static ActiveCampaignContactsResource contacts()
+ * @method static ActiveCampaignFieldValuesResource fieldValues()
+ * @method static ActiveCampaignFieldsResource fields()
+ * @method static ActiveCampaignTagsResource tags()
  */
 class ActiveCampaign extends Facade
 {
