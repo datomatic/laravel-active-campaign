@@ -102,6 +102,27 @@ class ActiveCampaignContactsResource extends ActiveCampaignResource
     }
 
     /**
+     * Remove a tag from a contact.
+     *
+     * @see https://developers.activecampaign.com/reference#delete-contact-tag
+     *
+     * @throws ActiveCampaignException|RequestException
+     */
+    public function untag(int $contactId, int $tagId): void
+    {
+        $contactTagId = $this->getContactTagId($contactId, $tagId);
+
+        if ($contactTagId) {
+            $this->request(
+                method: Method::DELETE,
+                path: 'contactTags/'.$contactTagId
+            );
+        } else {
+            ActiveCampaignException::contactTagMissing($contactId, $tagId);
+        }
+    }
+
+    /**
      * Remove a tag from a contact without exceptions.
      *
      * @see https://developers.activecampaign.com/reference#delete-contact-tag
@@ -169,5 +190,32 @@ class ActiveCampaignContactsResource extends ActiveCampaignResource
         }
 
         return null;
+    }
+
+
+    /**
+     * Update contact list subscriptions.
+     *
+     * @throws ActiveCampaignException|RequestException
+     */
+    public function updateListStatus(int $contactId, array $listStatus): void
+    {
+        $lists = [];
+        foreach ($listStatus as $listId => $status) {
+            $lists []= [
+                "contact" => $contactId,
+                'list' => $listId,
+                'status' => $status
+            ];
+        }
+
+        $this->request(
+            method: Method::POST,
+            path: 'contactLists',
+            options: [
+                'contactLists' => $lists,
+            ]
+        );
+
     }
 }

@@ -50,13 +50,13 @@ abstract class ActiveCampaignResource implements ActiveCampaignResourceContract
      */
     public function list(?string $query = null, ?string $responseKey = null): Collection
     {
-        $contacts = $this->request(
+        $objs = $this->request(
             method: Method::GET,
             path: $this->resourceBasePath.($query ? '?'.$query : ''),
             responseKey: $responseKey
         );
 
-        return collect($contacts);
+        return collect($objs);
     }
 
     /**
@@ -66,13 +66,13 @@ abstract class ActiveCampaignResource implements ActiveCampaignResourceContract
      */
     public function create(array $data): array
     {
-        $contact = $this->request(
+        $obj = $this->request(
             method: Method::POST,
             path: $this->resourceBasePath,
             options: $this->requestCast($data)
         );
 
-        return $this->responseCast($contact);
+        return $this->responseCast($obj);
     }
 
     /**
@@ -82,12 +82,12 @@ abstract class ActiveCampaignResource implements ActiveCampaignResourceContract
      */
     public function get(int $id): array
     {
-        $contact = $this->request(
+        $obj = $this->request(
             method: Method::GET,
             path: $this->resourceBasePath.'/'.$id,
         );
 
-        return $this->responseCast($contact);
+        return $this->responseCast($obj);
     }
 
     /**
@@ -97,13 +97,13 @@ abstract class ActiveCampaignResource implements ActiveCampaignResourceContract
      */
     public function update(int $id, array $data): array
     {
-        $contact = $this->request(
+        $obj = $this->request(
             method: Method::PUT,
             path: $this->resourceBasePath.'/'.$id,
             options: $this->requestCast($data),
         );
 
-        return $this->responseCast($contact);
+        return $this->responseCast($obj);
     }
 
     /**
