@@ -184,7 +184,7 @@ class ActiveCampaignContactsResource extends ActiveCampaignResource
         $contactTags = $this->tags($contactId);
 
         foreach ($contactTags as $contactTag) {
-            if (intval($contactTag['tag_id']) === $tagId) {
+            if (isset($contactTag['tag_id']) && intval($contactTag['tag_id']) === $tagId) {
                 return intval($contactTag['id']);
             }
         }
