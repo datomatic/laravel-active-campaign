@@ -2,6 +2,10 @@
 
 All notable changes to `laravel-active-campaign` will be documented in this file.
 
+## v0.2.2 - 2025-04-12
+
+Laravel 12
+
 ## v0.2.0 - 2025-02-24
 
 - Laravel 12 support
