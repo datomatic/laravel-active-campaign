@@ -192,7 +192,6 @@ class ActiveCampaignContactsResource extends ActiveCampaignResource
         return null;
     }
 
-
     /**
      * Update contact list subscriptions.
      *
@@ -202,10 +201,10 @@ class ActiveCampaignContactsResource extends ActiveCampaignResource
     {
         $lists = [];
         foreach ($listStatus as $listId => $status) {
-            $lists []= [
-                "contact" => $contactId,
+            $lists[] = [
+                'contact' => $contactId,
                 'list' => $listId,
-                'status' => $status
+                'status' => $status,
             ];
         }
 
