@@ -102,27 +102,6 @@ class ActiveCampaignContactsResource extends ActiveCampaignResource
     }
 
     /**
-     * Remove a tag from a contact.
-     *
-     * @see https://developers.activecampaign.com/reference#delete-contact-tag
-     *
-     * @throws ActiveCampaignException|RequestException
-     */
-    public function untag(int $contactId, int $tagId): void
-    {
-        $contactTagId = $this->getContactTagId($contactId, $tagId);
-
-        if ($contactTagId) {
-            $this->request(
-                method: Method::DELETE,
-                path: 'contactTags/'.$contactTagId
-            );
-        } else {
-            ActiveCampaignException::contactTagMissing($contactId, $tagId);
-        }
-    }
-
-    /**
      * Remove a tag from a contact without exceptions.
      *
      * @see https://developers.activecampaign.com/reference#delete-contact-tag
