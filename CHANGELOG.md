@@ -2,6 +2,10 @@
 
 All notable changes to `laravel-active-campaign` will be documented in this file.
 
+## v0.3.0 - 2026-03-17
+
+Laravel 13 support
+
 ## v0.2.3 - 2025-07-22
 
 - fix
