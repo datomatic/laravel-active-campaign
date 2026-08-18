@@ -14,7 +14,7 @@ class ActiveCampaignConfig extends Config
         return self::getStringParam('api_key');
     }
 
-    public static function timeout(): string
+    public static function timeout(): int
     {
         return self::getIntParam('timeout');
     }
@@ -29,6 +29,9 @@ class ActiveCampaignConfig extends Config
         return self::getIntParam('retry_sleep');
     }
 
+    /**
+     * @return array<string, int|string>
+     */
     public static function customFields(): array
     {
         return self::getArrayParam('custom_fields');

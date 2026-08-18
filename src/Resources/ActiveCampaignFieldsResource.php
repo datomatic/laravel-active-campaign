@@ -2,59 +2,71 @@
 
 namespace Datomatic\ActiveCampaign\Resources;
 
+use Datomatic\ActiveCampaign\Enums\FieldType;
 use Datomatic\ActiveCampaign\Exceptions\ActiveCampaignException;
-use Illuminate\Http\Client\RequestException;
-use Illuminate\Support\Collection;
 
 class ActiveCampaignFieldsResource extends ActiveCampaignResource
 {
     protected string $resourceBasePath = 'fields';
 
-    /**
-     * @return Collection<int, array>
-     *
-     * @throws ActiveCampaignException|RequestException
-     */
-    public function list(?string $query = null, ?string $responseKey = null): Collection
-    {
-        return parent::list($query, 'fields');
-    }
+    protected ?string $responseKey = 'fields';
 
     /**
-     * Create a field value type safe.
+     * Create a custom field.
+     *
+     * @see https://developers.activecampaign.com/reference/create-a-new-field
+     *
+     * @param  array<string, mixed>  $attributes  any other supported attribute (descript, perstag, defval, visible, ordernum, ...)
+     * @return array<string, mixed>
      *
      * @throws ActiveCampaignException
-     * @throws RequestException
      */
-    public function createField(int $field, string $value): array
+    public function createField(string $title, FieldType $type = FieldType::Text, array $attributes = []): array
     {
-        return parent::create([
-            'field' => $field,
-            'value' => $value,
+        return $this->create([
+            'title' => $title,
+            'type' => $type->value,
+            ...$attributes,
         ]);
     }
 
     /**
-     * Update an existing field value type safe.
+     * Update an existing custom field.
      *
-     * @throws ActiveCampaignException|RequestException
+     * @see https://developers.activecampaign.com/reference/update-a-custom-field
+     *
+     * @param  array<string, mixed>  $attributes
+     * @return array<string, mixed>
+     *
+     * @throws ActiveCampaignException
      */
-    public function updateFieldValue(int $id, int $field, string $value): array
+    public function updateField(int $id, string $title, FieldType $type = FieldType::Text, array $attributes = []): array
     {
-        return parent::update($id, [
-            'field' => $field,
-            'value' => $value,
+        return $this->update($id, [
+            'title' => $title,
+            'type' => $type->value,
+            ...$attributes,
         ]);
     }
 
+    /**
+     * @param  array<string, mixed>  $request
+     * @return array<string, mixed>
+     */
     protected function requestCast(array $request): array
     {
         return ['field' => $request];
     }
 
+    /**
+     * @param  array<string, mixed>  $response
+     * @return array<string, mixed>
+     */
     protected function responseCast(array $response): array
     {
         $responseCast = $response['field'];
+
+        unset($responseCast['links']);
 
         return $responseCast;
     }

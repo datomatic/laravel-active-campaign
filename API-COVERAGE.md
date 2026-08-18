@@ -1,0 +1,172 @@
+# API coverage — what the package covers, and what it doesn't
+
+Notes taken while preparing `v1.0.0`, measured against the
+[ActiveCampaign API v3 reference](https://developers.activecampaign.com/reference).
+
+Nothing here blocks the 1.0 release: the package is honest about being a wrapper around four
+resources, and `request()` is public so any endpoint is reachable. This is the roadmap for 1.x.
+
+---
+
+## 1. Cross-cutting gaps (higher impact than any single endpoint)
+
+These affect endpoints that are *already* wrapped, so they are the ones worth doing first.
+
+### 1.1 Pagination — the biggest one
+
+ActiveCampaign returns **20 records by default, 100 maximum**, plus a `meta` object:
+
+```json
+{ "contacts": [ ... ], "meta": { "total": "4312", "page_input": { ... } } }
+```
+
+`list()` returns the first page only and throws `meta` away. A caller with 4 000 contacts silently
+gets 20 and has no way to know. What is missing:
+
+- `limit` / `offset` handling.
+- Access to `meta.total`.
+- An auto-paginating method (`lazy()` / `each()` / `all()`) returning a `LazyCollection` that walks
+  every page.
+
+Suggested shape:
+
+```php
+ActiveCampaign::contacts()->list('limit=100&offset=200');   // works today, by hand
+ActiveCampaign::contacts()->paginate(perPage: 100);         // missing
+ActiveCampaign::contacts()->lazy();                         // missing — LazyCollection
+ActiveCampaign::contacts()->count();                        // missing — from meta.total
+```
+
+### 1.2 Query building
+
+`list()` takes a raw query string. The API's filter syntax is verbose and easy to get wrong:
+
+```
+filters[created_after]=2024-01-01&orders[cdate]=DESC&include=contactTags&limit=100
+```
+
+A small fluent builder (`->filter('email', $x)->orderBy('cdate', 'DESC')->include('contactTags')`)
+would remove most of the string juggling. Note that filter support differs per endpoint — contacts
+also accept the legacy top-level `email=`, `search=`, `segmentid=`, `listid=`, `tagid=` params.
+
+### 1.3 Rate limiting
+
+ActiveCampaign allows **5 requests/second per account**. The package retries a `429`, but:
+
+- it does not read the `Retry-After` header, it just sleeps `retry_sleep`;
+- there is no client-side throttle, so a loop over `updateListStatus()` or an `untag()` batch can
+  trip the limit by itself.
+
+### 1.4 Everything is an array
+
+No DTOs, no typed properties, no IDE completion on results. Acceptable for 1.0 (and keeps the
+package thin), but it is the reason PHPStan stops at level 8 rather than level 9/10.
+
+### 1.5 No events
+
+Nothing is dispatched, so consumers cannot hook into "contact synced" / "request failed" without
+wrapping every call. Laravel's own `Illuminate\Http\Client\Events\ResponseReceived` fires, but it is
+not scoped to this package.
+
+### 1.6 Testing helpers not exposed
+
+Consumers have to hand-write `Http::fake(['*.api-us1.com/api/3/contacts' => ...])`. A shipped
+`ActiveCampaign::fake()` / response factory would be a small, high-value addition.
+
+---
+
+## 2. Endpoint coverage of the resources we *do* wrap
+
+### Contacts — partial
+
+Covered: list/search, retrieve, create, update, delete, sync, contact tags (list/add/remove), list
+subscription status.
+
+Missing:
+
+| Endpoint | Notes |
+|---|---|
+| `GET /contacts/{id}/contactLists` | read back which lists a contact is on — we can only write |
+| `GET /contacts/{id}/fieldValues` | a contact's custom field values, without a full retrieve |
+| `GET /contacts/{id}/contactAutomations` | automations the contact is in |
+| `POST /contactAutomations` / `DELETE /contactAutomations/{id}` | add/remove a contact to an automation |
+| `GET /contacts/{id}/contactDeals` | deals of a contact |
+| `GET /contacts/{id}/geoIps`, `/trackingLogs`, `/scoreValues`, `/bounceLogs`, `/contactData` | activity & enrichment data |
+| `GET /contacts/{id}/organization` | CRM account of the contact |
+| `POST /import/bulk_import` | bulk import, up to 250 contacts per call — the right tool for big syncs |
+| `GET /import/info`, `GET /import/bulk_import/{batchId}/status` | bulk import status |
+| `DELETE /contacts/bulk_delete` | bulk delete |
+
+`sync()` also ignores the `tags` key that the API accepts inside `contact` (additive, auto-creates
+tags) — supporting it would remove the separate `tag()` round-trip in the common case.
+
+### Tags — essentially complete
+
+Covered: list, retrieve, create, update, delete, both `tagType`s.
+Missing: nothing meaningful. Listing a tag's contacts is done through the contacts endpoint
+(`contacts?tagid=`), which already works.
+
+### Fields — incomplete in a way that bites
+
+Covered: list, retrieve, create, update, delete of the field definition.
+
+Missing, and needed for a custom field to actually be usable:
+
+| Endpoint | Why it matters |
+|---|---|
+| `POST /fieldRels` | **a custom field is invisible until it is related to a list** (`fieldRel` with `relid: 0` = all lists). Creating a field with this package alone leaves it unattached. |
+| `POST /fieldOption/bulk`, `GET/POST/DELETE /fieldOptions` | dropdown/radio/checkbox/listbox fields are useless without their options |
+| `GET /fields/{id}/options`, `/relations` | reading the above back |
+
+This is the largest correctness gap in an endpoint group we claim to support.
+
+### Field values — complete
+
+Covered: list, retrieve, create, update, delete.
+Missing: the `useDefaults` flag on create/update, which populates other required fields with their
+defaults. Minor.
+
+---
+
+## 3. Resource groups not wrapped at all
+
+Roughly ordered by how often they come up.
+
+| Group | Endpoints | Note |
+|---|---|---|
+| **Lists** | `/lists`, `/lists/{id}/contactGoalLists`, `/listGroups` | conspicuous omission — we can subscribe a contact to a list id but not discover, create or manage lists |
+| **Deals (CRM)** | `/deals`, `/dealStages`, `/dealGroups` (pipelines), `/dealCustomFieldMeta`, `/dealCustomFieldData`, `/notes`, `/dealTasks`, `/dealTasktypes` | the whole CRM half of the product |
+| **Accounts (CRM)** | `/accounts`, `/accountContacts`, `/accountCustomFieldMeta`, `/accountCustomFieldData` | B2B/organization records |
+| **Automations** | `/automations`, `/contactAutomations` | triggering an automation for a contact is a very common integration need |
+| **Campaigns** | `/campaigns`, `/campaigns/{id}/links`, `/messages` | |
+| **Webhooks** | `/webhooks`, `/webhook/events`, `/webhook/listeners` | plus no signature verification / event-to-listener helper on our side |
+| **Ecommerce (Deep Data)** | `/ecomOrders`, `/ecomCustomers`, `/ecomOrderProducts`, `/ecomOrderActivities`, `/connections` | large surface, separate concern — arguably its own package |
+| **Segments** | `/segments` | |
+| **Forms** | `/forms` | |
+| **Templates** | `/templates` | |
+| **Users & Groups** | `/users`, `/groups`, `/userGroups` | account administration |
+| **Addresses** | `/addresses`, `/addressGroups`, `/addressLists` | required for compliance footers |
+| **Scores** | `/scores` | contact & deal scoring rules |
+| **Saved responses, Calendar feeds, Branding, Task outcomes, Configs, SMS, Site messages** | | rarely needed |
+| **Site & event tracking** | `trackcmp.net/event`, `/whitelist`, `/status` | **different host and a different auth scheme** — would need its own client, not just a new resource |
+
+---
+
+## 4. Suggested order of work after 1.0
+
+1. **1.1 pagination** and **2. `fieldRels` / `fieldOptions`** — these make what we already ship
+   correct rather than adding surface.
+2. **Lists** resource — small, and closes the loop with `updateListStatus()`.
+3. **Automations** (`/contactAutomations`) — high demand, tiny surface.
+4. **1.2 query builder** + **1.6 test helpers** — developer experience.
+5. **Bulk import** (`/import/bulk_import`) — the correct answer to "sync 10 000 contacts", which
+   today means 10 000 requests against a 5 req/s limit.
+6. Deals / Accounts, as a second wave.
+
+## 5. Things deliberately not done
+
+- **DTOs / typed responses.** Arrays keep the wrapper thin and forward-compatible with API changes.
+  Revisit only if the package grows past ~10 resources.
+- **Ecommerce Deep Data.** Big enough to deserve `datomatic/laravel-active-campaign-ecommerce`.
+- **Site tracking.** Different host, different credentials (`actid` + event key); mixing it into the
+  same client would muddy the config.

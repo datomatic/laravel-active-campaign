@@ -3,7 +3,7 @@
 namespace Datomatic\ActiveCampaign\Tests;
 
 use Datomatic\ActiveCampaign\ActiveCampaignServiceProvider;
-use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Facades\Http;
 use Orchestra\Testbench\TestCase as Orchestra;
 
 class TestCase extends Orchestra
@@ -12,9 +12,7 @@ class TestCase extends Orchestra
     {
         parent::setUp();
 
-        Factory::guessFactoryNamesUsing(
-            fn (string $modelName) => 'Datomatic\\ActiveCampaign\\Database\\Factories\\'.class_basename($modelName).'Factory'
-        );
+        Http::preventStrayRequests();
     }
 
     protected function getPackageProviders($app)
@@ -26,11 +24,9 @@ class TestCase extends Orchestra
 
     public function getEnvironmentSetUp($app)
     {
-        config()->set('database.default', 'testing');
-
-        /*
-        $migration = include __DIR__.'/../database/migrations/create_laravel-active-campaign_table.php.stub';
-        $migration->up();
-        */
+        config()->set('active-campaign.base_url', 'https://test.api-us1.com');
+        config()->set('active-campaign.api_key', 'test-api-key');
+        config()->set('active-campaign.retry_times', 1);
+        config()->set('active-campaign.retry_sleep', 0);
     }
 }

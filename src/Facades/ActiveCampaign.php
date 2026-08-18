@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\Facade;
  */
 class ActiveCampaign extends Facade
 {
-    protected static function getFacadeAccessor()
+    protected static function getFacadeAccessor(): string
     {
         return \Datomatic\ActiveCampaign\ActiveCampaign::class;
     }

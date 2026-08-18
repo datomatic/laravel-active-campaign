@@ -2,38 +2,32 @@
 
 namespace Datomatic\ActiveCampaign\Resources;
 
+use Datomatic\ActiveCampaign\Enums\ListStatus;
 use Datomatic\ActiveCampaign\Enums\Method;
 use Datomatic\ActiveCampaign\Exceptions\ActiveCampaignException;
 use Datomatic\ActiveCampaign\Support\ActiveCampaignConfig;
-use Illuminate\Http\Client\RequestException;
-use Illuminate\Support\Collection;
 
 class ActiveCampaignContactsResource extends ActiveCampaignResource
 {
     protected string $resourceBasePath = 'contacts';
 
-    /**
-     * List all contact, search contacts, or filter contacts by query defined criteria.
-     *
-     * @return Collection<int, array>
-     *
-     * @throws ActiveCampaignException|RequestException
-     */
-    public function list(?string $query = null, ?string $responseKey = null): Collection
-    {
-        return parent::list($query, 'contacts');
-    }
+    protected ?string $responseKey = 'contacts';
 
     /**
-     * Sync an existing contact without passing id.
+     * Create the contact if the email is unknown, update it otherwise.
      *
-     * @throws ActiveCampaignException|RequestException
+     * @see https://developers.activecampaign.com/reference/sync-a-contacts-data
+     *
+     * @param  array<string, mixed>  $contactArray
+     * @return array<string, mixed>
+     *
+     * @throws ActiveCampaignException
      */
     public function sync(array $contactArray): array
     {
         $contact = $this->request(
             method: Method::POST,
-            path: 'contacts/sync',
+            path: 'contact/sync',
             options: $this->requestCast($contactArray),
         );
 
@@ -43,17 +37,17 @@ class ActiveCampaignContactsResource extends ActiveCampaignResource
     /**
      * Get a contactTags list of a contact.
      *
-     * @throws ActiveCampaignException|RequestException
+     * @return array<int, array<string, mixed>>
+     *
+     * @throws ActiveCampaignException
      */
     public function tags(int $contactId): array
     {
-        $contactTags = $this->request(
+        return $this->request(
             method: Method::GET,
             path: 'contacts/'.$contactId.'/contactTags',
             responseKey: 'contactTags'
         );
-
-        return $contactTags;
     }
 
     /**
@@ -61,11 +55,13 @@ class ActiveCampaignContactsResource extends ActiveCampaignResource
      *
      * @see https://developers.activecampaign.com/reference/create-contact-tag
      *
-     * @throws ActiveCampaignException|RequestException
+     * @return array<string, mixed>
+     *
+     * @throws ActiveCampaignException
      */
     public function tag(int $contactId, int $tagId): array
     {
-        $contactTag = $this->request(
+        return $this->request(
             method: Method::POST,
             path: 'contactTags',
             options: [
@@ -76,63 +72,115 @@ class ActiveCampaignContactsResource extends ActiveCampaignResource
             ],
             responseKey: 'contactTag'
         );
-
-        return $contactTag;
     }
 
     /**
      * Remove a tag from a contact.
      *
-     * @see https://developers.activecampaign.com/reference#delete-contact-tag
+     * @see https://developers.activecampaign.com/reference/remove-a-contacts-tag
      *
-     * @throws ActiveCampaignException|RequestException
+     * @throws ActiveCampaignException
      */
     public function untag(int $contactId, int $tagId): void
     {
         $contactTagId = $this->getContactTagId($contactId, $tagId);
 
-        if ($contactTagId) {
-            $this->request(
-                method: Method::DELETE,
-                path: 'contactTags/'.$contactTagId
-            );
-        } else {
-            ActiveCampaignException::contactTagMissing($contactId, $tagId);
-        }
+        throw_if(is_null($contactTagId), ActiveCampaignException::contactTagMissing($contactId, $tagId));
+
+        $this->request(
+            method: Method::DELETE,
+            path: 'contactTags/'.$contactTagId
+        );
     }
 
     /**
-     * Remove a tag from a contact without exceptions.
+     * Remove a tag from a contact, ignoring a tag that is not applied.
      *
-     * @see https://developers.activecampaign.com/reference#delete-contact-tag
+     * @see https://developers.activecampaign.com/reference/remove-a-contacts-tag
+     *
+     * @throws ActiveCampaignException
      */
     public function tryUntag(int $contactId, int $tagId): void
     {
-        try {
+        if ($this->getContactTagId($contactId, $tagId)) {
             $this->untag($contactId, $tagId);
-        } catch (ActiveCampaignException) {
         }
     }
 
     /**
-     * @return mixed[]
+     * Get the contactTag id of the association between a contact and a tag.
+     *
+     * @throws ActiveCampaignException
+     */
+    public function getContactTagId(int $contactId, int $tagId): ?int
+    {
+        foreach ($this->tags($contactId) as $contactTag) {
+            if (isset($contactTag['tag']) && intval($contactTag['tag']) === $tagId) {
+                return intval($contactTag['id']);
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Subscribe or unsubscribe a contact from one or more lists.
+     *
+     * @see https://developers.activecampaign.com/reference/update-list-status-for-contact
+     *
+     * @param  array<int, ListStatus|int>  $listStatus  list id => status
+     *
+     * @throws ActiveCampaignException
+     */
+    public function updateListStatus(int $contactId, array $listStatus): void
+    {
+        foreach ($listStatus as $listId => $status) {
+            $this->request(
+                method: Method::POST,
+                path: 'contactLists',
+                options: [
+                    'contactList' => [
+                        'contact' => $contactId,
+                        'list' => $listId,
+                        'status' => $status instanceof ListStatus ? $status->value : $status,
+                    ],
+                ]
+            );
+        }
+    }
+
+    /**
+     * Custom fields are declared by name in the config file, but the API only knows their ids.
+     *
+     * @param  array<string, mixed>  $contactRequest
+     * @return array<string, mixed>
+     *
+     * @throws ActiveCampaignException
      */
     protected function requestCast(array $contactRequest): array
     {
         throw_if(empty($contactRequest['email']), ActiveCampaignException::missingField('contacts', 'email'));
 
-        $requestArray = [];
-        $requestArray['contact'] = collect($contactRequest)->only(['email', 'firstName', 'lastName', 'phone'])->toArray();
-        $requestArray['fieldValues'] = collect(ActiveCampaignConfig::customFields())
+        $contact = collect($contactRequest)->only(['email', 'firstName', 'lastName', 'phone'])->toArray();
+
+        $fieldValues = collect(ActiveCampaignConfig::customFields())
             ->filter(fn ($customFieldId, $customFieldName) => ! empty($contactRequest[$customFieldName]))
             ->map(fn ($customFieldId, $customFieldName) => [
                 'field' => strval($customFieldId),
                 'value' => $contactRequest[$customFieldName],
             ])->values()->all();
 
-        return $requestArray;
+        if ($fieldValues !== []) {
+            $contact['fieldValues'] = $fieldValues;
+        }
+
+        return ['contact' => $contact];
     }
 
+    /**
+     * @param  array<string, mixed>  $response
+     * @return array<string, mixed>
+     */
     protected function responseCast(array $response): array
     {
         $responseCast = $response['contact'];
@@ -151,49 +199,5 @@ class ActiveCampaignContactsResource extends ActiveCampaignResource
         }
 
         return $responseCast;
-    }
-
-    /**
-     * Get contactTag id if associated to contact
-     *
-     * @throws ActiveCampaignException|RequestException
-     */
-    public function getContactTagId(int $contactId, int $tagId): ?int
-    {
-        $contactTags = $this->tags($contactId);
-
-        foreach ($contactTags as $contactTag) {
-            if (isset($contactTag['tag_id']) && intval($contactTag['tag_id']) === $tagId) {
-                return intval($contactTag['id']);
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * Update contact list subscriptions.
-     *
-     * @throws ActiveCampaignException|RequestException
-     */
-    public function updateListStatus(int $contactId, array $listStatus): void
-    {
-        $lists = [];
-        foreach ($listStatus as $listId => $status) {
-            $lists[] = [
-                'contact' => $contactId,
-                'list' => $listId,
-                'status' => $status,
-            ];
-        }
-
-        $this->request(
-            method: Method::POST,
-            path: 'contactLists',
-            options: [
-                'contactLists' => $lists,
-            ]
-        );
-
     }
 }

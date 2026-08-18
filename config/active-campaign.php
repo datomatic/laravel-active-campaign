@@ -3,8 +3,8 @@
 // config for Datomatic/ActiveCampaign
 return [
     /**
-     * Your Active Campaign Base URL
-     * https://<your-account>.api-us1.com/api/3
+     * Your Active Campaign account URL, without the /api/3 suffix.
+     * https://<your-account>.api-us1.com
      *
      * More information: https://developers.activecampaign.com/reference/url
      */
@@ -18,15 +18,25 @@ return [
      */
     'api_key' => env('ACTIVE_CAMPAIGN_API_KEY'),
 
+    /**
+     * Request timeout, in seconds.
+     */
     'timeout' => 100,
 
+    /**
+     * How many times a request is attempted before giving up.
+     * Only connection errors, 429 and 5xx responses are retried.
+     */
     'retry_times' => 3,
 
-    'retry_sleep' => 5,
+    /**
+     * How long to wait between two attempts, in milliseconds.
+     */
+    'retry_sleep' => 1000,
 
     /**
      * (optional)
-     * Here you can list your custom fields ids.
+     * Map your Active Campaign custom field ids to the names you want to use in your code.
      */
     'custom_fields' => [
         // 'is_email_verified' => 50,

@@ -2,61 +2,66 @@
 
 namespace Datomatic\ActiveCampaign\Resources;
 
+use Datomatic\ActiveCampaign\Enums\TagType;
 use Datomatic\ActiveCampaign\Exceptions\ActiveCampaignException;
-use Illuminate\Http\Client\RequestException;
-use Illuminate\Support\Collection;
 
 class ActiveCampaignTagsResource extends ActiveCampaignResource
 {
     protected string $resourceBasePath = 'tags';
 
-    /**
-     * @return Collection<int, array>
-     *
-     * @throws ActiveCampaignException|RequestException
-     */
-    public function list(?string $query = null, ?string $responseKey = null): Collection
-    {
-        return parent::list($query, 'tags');
-    }
+    protected ?string $responseKey = 'tags';
 
     /**
-     * Create a tag
+     * Create a tag.
      *
-     * @throws ActiveCampaignException|RequestException
+     * @see https://developers.activecampaign.com/reference/create-a-new-tag
+     *
+     * @return array<string, mixed>
+     *
+     * @throws ActiveCampaignException
      */
-    public function createTag(string $name, string $description = ''): array
+    public function createTag(string $name, string $description = '', TagType $type = TagType::Contact): array
     {
-        return parent::create([
+        return $this->create([
             'tag' => $name,
             'description' => $description,
+            'tagType' => $type->value,
         ]);
     }
 
     /**
      * Update an existing tag.
      *
+     * @see https://developers.activecampaign.com/reference/update-a-tag
      *
-     * @throws ActiveCampaignException|RequestException
+     * @return array<string, mixed>
+     *
+     * @throws ActiveCampaignException
      */
-    public function updateTag(int $tagId, string $name, string $description = ''): array
+    public function updateTag(int $tagId, string $name, string $description = '', TagType $type = TagType::Contact): array
     {
-        return parent::update($tagId, [
+        return $this->update($tagId, [
             'tag' => $name,
             'description' => $description,
+            'tagType' => $type->value,
         ]);
     }
 
+    /**
+     * @param  array<string, mixed>  $request
+     * @return array<string, mixed>
+     */
     protected function requestCast(array $request): array
     {
-        $request = ['tag' => $request];
-        if (! isset($request['tag']['tagType'])) {
-            $request['tag']['tagType'] = 'contact';
-        }
+        $request['tagType'] ??= TagType::Contact->value;
 
-        return $request;
+        return ['tag' => $request];
     }
 
+    /**
+     * @param  array<string, mixed>  $response
+     * @return array<string, mixed>
+     */
     protected function responseCast(array $response): array
     {
         $responseCast = $response['tag'];

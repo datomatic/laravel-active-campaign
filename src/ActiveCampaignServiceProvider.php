@@ -11,11 +11,6 @@ class ActiveCampaignServiceProvider extends PackageServiceProvider
 {
     public function configurePackage(Package $package): void
     {
-        /*
-         * This class is a Package Service Provider
-         *
-         * More info: https://github.com/spatie/laravel-package-tools
-         */
         $package
             ->name('laravel-active-campaign')
             ->hasConfigFile();
@@ -23,6 +18,8 @@ class ActiveCampaignServiceProvider extends PackageServiceProvider
 
     public function packageRegistered(): void
     {
-        $this->app->singleton(ActiveCampaignClientContract::class, fn () => ActiveCampaignClientFactory::make());
+        // Bound (not shared) on purpose: a PendingRequest is stateful and must not be reused across calls.
+        $this->app->bind(ActiveCampaignClientContract::class, fn () => ActiveCampaignClientFactory::make());
+        $this->app->singleton(ActiveCampaign::class);
     }
 }

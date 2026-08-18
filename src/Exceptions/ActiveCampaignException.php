@@ -13,10 +13,13 @@ class ActiveCampaignException extends Exception
 
     public static function contactTagMissing(int $contactId, int $tagId): self
     {
-        return new self('The tag '.$tagId.' missing on contact'.$contactId);
+        return new self('The tag '.$tagId.' is missing on contact '.$contactId);
     }
 
-    public static function requestError(string $path, array $result): self
+    /**
+     * @param  array<mixed>|null  $result
+     */
+    public static function requestError(string $path, ?array $result = null): self
     {
         if (isset($result['errors'])) {
             $error = json_encode($result['errors']);

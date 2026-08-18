@@ -3,55 +3,61 @@
 namespace Datomatic\ActiveCampaign\Resources;
 
 use Datomatic\ActiveCampaign\Exceptions\ActiveCampaignException;
-use Illuminate\Http\Client\RequestException;
-use Illuminate\Support\Collection;
 
 class ActiveCampaignFieldValuesResource extends ActiveCampaignResource
 {
     protected string $resourceBasePath = 'fieldValues';
 
-    /**
-     * @return Collection<int, array>
-     *
-     * @throws ActiveCampaignException|RequestException
-     */
-    public function list(?string $query = null, ?string $responseKey = null): Collection
-    {
-        return parent::list($query, 'fieldValues');
-    }
+    protected ?string $responseKey = 'fieldValues';
 
     /**
-     * Create a field value type safe.
+     * Set the value of a custom field for a contact.
+     *
+     * @see https://developers.activecampaign.com/reference/create-fieldvalue
+     *
+     * @return array<string, mixed>
      *
      * @throws ActiveCampaignException
-     * @throws RequestException
      */
-    public function createFieldValue(int $field, string $value): array
+    public function createFieldValue(int $contactId, int $fieldId, string $value): array
     {
-        return parent::create([
-            'field' => $field,
+        return $this->create([
+            'contact' => $contactId,
+            'field' => $fieldId,
             'value' => $value,
         ]);
     }
 
     /**
-     * Update an existing field value type safe.
+     * Update an existing field value.
      *
-     * @throws ActiveCampaignException|RequestException
+     * @see https://developers.activecampaign.com/reference/update-a-fieldvalue
+     *
+     * @return array<string, mixed>
+     *
+     * @throws ActiveCampaignException
      */
-    public function updateFieldValue(int $id, int $field, string $value): array
+    public function updateFieldValue(int $id, int $fieldId, string $value): array
     {
-        return parent::update($id, [
-            'field' => $field,
+        return $this->update($id, [
+            'field' => $fieldId,
             'value' => $value,
         ]);
     }
 
+    /**
+     * @param  array<string, mixed>  $request
+     * @return array<string, mixed>
+     */
     protected function requestCast(array $request): array
     {
         return ['fieldValue' => $request];
     }
 
+    /**
+     * @param  array<string, mixed>  $response
+     * @return array<string, mixed>
+     */
     protected function responseCast(array $response): array
     {
         $responseCast = $response['fieldValue'];
