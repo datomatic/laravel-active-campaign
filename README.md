@@ -83,7 +83,9 @@ Every resource is reachable from the `ActiveCampaign` facade (or by injecting
 |---|---|---|
 | `ActiveCampaign::contacts()` | contacts, contact tags, list subscriptions | `/contacts`, `/contact/sync`, `/contactTags`, `/contactLists` |
 | `ActiveCampaign::tags()` | tags | `/tags` |
-| `ActiveCampaign::fields()` | custom field definitions | `/fields` |
+| `ActiveCampaign::fields()` | custom field definitions, their options and list relations | `/fields`, `/fieldOption/bulk`, `/fieldRels` |
+| `ActiveCampaign::fieldOptions()` | selectable values of a field | `/fieldOptions`, `/fieldOption/bulk` |
+| `ActiveCampaign::fieldRels()` | field ↔ list relations | `/fieldRels` |
 | `ActiveCampaign::fieldValues()` | custom field values of a contact | `/fieldValues` |
 
 All of them share the same CRUD surface:
@@ -277,6 +279,63 @@ ActiveCampaign::fields()->delete(1);
 
 The third argument is merged into the `field` object, so any attribute the API supports
 (`descript`, `perstag`, `defval`, `visible`, `ordernum`, `isrequired`, …) can be passed through.
+
+#### A field is not usable on its own
+
+Two things are easy to miss, and the API will not warn you about either:
+
+1. **A custom field stays invisible until it is related to a list.** A contact only sees a field if
+   one of the lists it belongs to has a relation to that field.
+2. **Dropdown, listbox, radio, checkbox and multiselect fields need their options created
+   separately.** `FieldType::requiresOptions()` tells you which types those are.
+
+`createField()` can do all three steps in one call:
+
+```php
+$field = ActiveCampaign::fields()->createField(
+    'Department',
+    FieldType::DropDown,
+    options: ['Sales', 'Engineering', 'Support'],
+    lists: [1, 2],
+);
+```
+
+That creates the field, bulk-creates its options in the order given, and relates it to lists 1 and 2.
+Omit `options`/`lists` and nothing extra is sent.
+
+Each step is also available on its own:
+
+```php
+ActiveCampaign::fields()->createOptions(34, ['Sales', 'Engineering']);
+ActiveCampaign::fields()->options(34);      // Collection of the field's options
+
+ActiveCampaign::fields()->relate(34, 1);    // relate field 34 to list 1
+ActiveCampaign::fields()->relate(34);       // relate it to every list
+ActiveCampaign::fields()->relations(34);    // Collection of the field's list relations
+```
+
+Options accept plain strings, or full arrays when you need more control. A string becomes an option
+whose `label` and `value` match, and `orderid` follows the array order unless you set it yourself:
+
+```php
+ActiveCampaign::fields()->createOptions(34, [
+    ['value' => 'sales', 'label' => 'Sales', 'isdefault' => true],
+    ['value' => 'eng', 'label' => 'Engineering'],
+]);
+```
+
+Options and relations have their own resources too, if you want to work with them directly:
+
+```php
+ActiveCampaign::fieldOptions()->createMany([
+    ['field' => 34, 'value' => 'Sales', 'label' => 'Sales', 'orderid' => 1],
+]);
+
+ActiveCampaign::fieldRels()->relate(34, 1);
+```
+
+> ActiveCampaign creates options only through its bulk endpoint, so
+> `fieldOptions()->create()` sends a one-element bulk request and hands you back the created option.
 
 ### Field values
 

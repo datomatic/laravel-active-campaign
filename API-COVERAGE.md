@@ -2,7 +2,7 @@
 
 Notes taken while preparing `v1.0.0`, measured against the
 [ActiveCampaign API v3 reference](https://developers.activecampaign.com/reference).
-Gap 1.1 (pagination) has since been closed; the rest still stands.
+Gaps 1.1 (pagination) and the fields gap in section 2 have since been closed; the rest still stands.
 
 Nothing here blocks the 1.0 release: the package is honest about being a wrapper around four
 resources, and `request()` is public so any endpoint is reachable. This is the roadmap for 1.x.
@@ -106,19 +106,30 @@ Covered: list, retrieve, create, update, delete, both `tagType`s.
 Missing: nothing meaningful. Listing a tag's contacts is done through the contacts endpoint
 (`contacts?tagid=`), which already works.
 
-### Fields — incomplete in a way that bites
+### Fields — done in 1.0
 
-Covered: list, retrieve, create, update, delete of the field definition.
+Covered: list, retrieve, create, update, delete of the field definition, plus the two things that
+make a field actually usable:
 
-Missing, and needed for a custom field to actually be usable:
-
-| Endpoint | Why it matters |
+| Endpoint | Wrapped as |
 |---|---|
-| `POST /fieldRels` | **a custom field is invisible until it is related to a list** (`fieldRel` with `relid: 0` = all lists). Creating a field with this package alone leaves it unattached. |
-| `POST /fieldOption/bulk`, `GET/POST/DELETE /fieldOptions` | dropdown/radio/checkbox/listbox fields are useless without their options |
-| `GET /fields/{id}/options`, `/relations` | reading the above back |
+| `POST /fieldOption/bulk` | `fields()->createOptions()`, `fieldOptions()->createMany()` |
+| `GET /fields/{id}/options` | `fields()->options()` |
+| `POST /fieldRels` | `fields()->relate()`, `fieldRels()->relate()` |
+| `GET /fields/{id}/relations` | `fields()->relations()` |
 
-This is the largest correctness gap in an endpoint group we claim to support.
+`fields()->createField()` can create the field, its options and its list relations in one call, and
+`FieldType::requiresOptions()` names the types that need options.
+
+Still open:
+
+- `update()` and `delete()` on `fieldOptions` / `fieldRels` are inherited from the base resource but
+  are not in the published reference, so they are untested against real responses. Treat them as
+  unsupported until confirmed.
+- `relid: 0` for "all lists" is what the app sends, but it is not documented. `relate()` defaults to
+  it via `ActiveCampaignFieldRelsResource::ALL_LISTS`; pass real list ids when you know them.
+- `GET /fields/{id}` already returns `fieldOptions` and `fieldRels` alongside `field`, and `get()`
+  discards them. `options()` / `relations()` each cost an extra request as a result.
 
 ### Field values — complete
 
@@ -134,7 +145,7 @@ Roughly ordered by how often they come up.
 
 | Group | Endpoints | Note |
 |---|---|---|
-| **Lists** | `/lists`, `/lists/{id}/contactGoalLists`, `/listGroups` | conspicuous omission — we can subscribe a contact to a list id but not discover, create or manage lists |
+| **Lists** | `/lists`, `/lists/{id}/contactGoalLists`, `/listGroups` | conspicuous omission — we can subscribe a contact to a list id, and relate a field to one, but not discover, create or manage lists |
 | **Deals (CRM)** | `/deals`, `/dealStages`, `/dealGroups` (pipelines), `/dealCustomFieldMeta`, `/dealCustomFieldData`, `/notes`, `/dealTasks`, `/dealTasktypes` | the whole CRM half of the product |
 | **Accounts (CRM)** | `/accounts`, `/accountContacts`, `/accountCustomFieldMeta`, `/accountCustomFieldData` | B2B/organization records |
 | **Automations** | `/automations`, `/contactAutomations` | triggering an automation for a contact is a very common integration need |
@@ -155,9 +166,8 @@ Roughly ordered by how often they come up.
 ## 4. Suggested order of work after 1.0
 
 1. ~~**1.1 pagination**~~ — done in 1.0.
-2. **`fieldRels` / `fieldOptions`** (section 2) — makes what we already ship correct rather than
-   adding surface. Next up.
-3. **Lists** resource — small, and closes the loop with `updateListStatus()`.
+2. ~~**`fieldRels` / `fieldOptions`**~~ — done in 1.0.
+3. **Lists** resource — small, and closes the loop with `updateListStatus()`. Next up.
 4. **Automations** (`/contactAutomations`) — high demand, tiny surface.
 5. **1.2 query builder** + **1.6 test helpers** — developer experience.
 6. **Bulk import** (`/import/bulk_import`) — the correct answer to "sync 10 000 contacts", which

@@ -3,6 +3,8 @@
 namespace Datomatic\ActiveCampaign;
 
 use Datomatic\ActiveCampaign\Resources\ActiveCampaignContactsResource;
+use Datomatic\ActiveCampaign\Resources\ActiveCampaignFieldOptionsResource;
+use Datomatic\ActiveCampaign\Resources\ActiveCampaignFieldRelsResource;
 use Datomatic\ActiveCampaign\Resources\ActiveCampaignFieldsResource;
 use Datomatic\ActiveCampaign\Resources\ActiveCampaignFieldValuesResource;
 use Datomatic\ActiveCampaign\Resources\ActiveCampaignTagsResource;
@@ -22,6 +24,16 @@ class ActiveCampaign
     public function fields(): ActiveCampaignFieldsResource
     {
         return resolve(ActiveCampaignFieldsResource::class);
+    }
+
+    public function fieldOptions(): ActiveCampaignFieldOptionsResource
+    {
+        return resolve(ActiveCampaignFieldOptionsResource::class);
+    }
+
+    public function fieldRels(): ActiveCampaignFieldRelsResource
+    {
+        return resolve(ActiveCampaignFieldRelsResource::class);
     }
 
     public function tags(): ActiveCampaignTagsResource

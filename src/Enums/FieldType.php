@@ -14,4 +14,19 @@ enum FieldType: string
     case CheckBox = 'checkbox';
     case Hidden = 'hidden';
     case ListBox = 'listbox';
+
+    /**
+     * Types whose value must be picked from a set of options: creating one without calling
+     * fields()->createOptions() leaves a field nobody can fill in.
+     */
+    public function requiresOptions(): bool
+    {
+        return in_array($this, [
+            self::DropDown,
+            self::MultiSelect,
+            self::Radio,
+            self::CheckBox,
+            self::ListBox,
+        ], true);
+    }
 }

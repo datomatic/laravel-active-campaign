@@ -47,6 +47,11 @@ could not have worked against the real API.
   `paginate()` returns a `LengthAwarePaginator`, and `lazy()`/`all()` walk every page.
   Contacts are walked with `id_greater` + `orders[id]=ASC` instead of offsets, as the API
   recommends, falling back to offsets when the caller sets its own ordering or id bound.
+- Custom field options and list relations, without which a created field is unusable:
+  `fields()->createOptions()`, `options()`, `relate()` and `relations()`, plus the
+  `fieldOptions()` and `fieldRels()` resources. `fields()->createField()` accepts `options:` and
+  `lists:` to do the whole workflow in one call, and `FieldType::requiresOptions()` names the types
+  that need options.
 - `ListStatus`, `FieldType` and `TagType` enums.
 - `tags()->createTag()`/`updateTag()` accept a `TagType`.
 - Full Pest test suite and PHPStan level 8.
