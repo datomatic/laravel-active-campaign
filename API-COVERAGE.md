@@ -2,6 +2,7 @@
 
 Notes taken while preparing `v1.0.0`, measured against the
 [ActiveCampaign API v3 reference](https://developers.activecampaign.com/reference).
+Gap 1.1 (pagination) has since been closed; the rest still stands.
 
 Nothing here blocks the 1.0 release: the package is honest about being a wrapper around four
 resources, and `request()` is public so any endpoint is reachable. This is the roadmap for 1.x.
@@ -12,7 +13,7 @@ resources, and `request()` is public so any endpoint is reachable. This is the r
 
 These affect endpoints that are *already* wrapped, so they are the ones worth doing first.
 
-### 1.1 Pagination — the biggest one
+### 1.1 Pagination — done in 1.0
 
 ActiveCampaign returns **20 records by default, 100 maximum**, plus a `meta` object:
 
@@ -20,22 +21,21 @@ ActiveCampaign returns **20 records by default, 100 maximum**, plus a `meta` obj
 { "contacts": [ ... ], "meta": { "total": "4312", "page_input": { ... } } }
 ```
 
-`list()` returns the first page only and throws `meta` away. A caller with 4 000 contacts silently
-gets 20 and has no way to know. What is missing:
+`list()` used to return the first page only and threw `meta` away, so a caller with 4 000 contacts
+silently got 20 with no way to know. Now covered by:
 
-- `limit` / `offset` handling.
-- Access to `meta.total`.
-- An auto-paginating method (`lazy()` / `each()` / `all()`) returning a `LazyCollection` that walks
-  every page.
+- `list($query, $limit, $offset)` — one explicit page.
+- `count($query)` — reads `meta.total`.
+- `paginate($perPage, $page, $query)` — `LengthAwarePaginator`, usable in a view.
+- `lazy($query, $perPage)` / `all($query, $perPage)` — walk every page.
+- Contacts walk by `id_greater` + `orders[id]=ASC` rather than by offset, as the API recommends,
+  falling back to offset when the caller sets its own ordering or id bound.
 
-Suggested shape:
+Still open:
 
-```php
-ActiveCampaign::contacts()->list('limit=100&offset=200');   // works today, by hand
-ActiveCampaign::contacts()->paginate(perPage: 100);         // missing
-ActiveCampaign::contacts()->lazy();                         // missing — LazyCollection
-ActiveCampaign::contacts()->count();                        // missing — from meta.total
-```
+- `id_less` / descending cursor walks.
+- `paginate()` has no cursor variant, so deep page numbers on contacts remain offset-based and slow.
+  A `cursorPaginate()` would fix that, at the cost of losing addressable page numbers.
 
 ### 1.2 Query building
 
@@ -154,14 +154,15 @@ Roughly ordered by how often they come up.
 
 ## 4. Suggested order of work after 1.0
 
-1. **1.1 pagination** and **2. `fieldRels` / `fieldOptions`** — these make what we already ship
-   correct rather than adding surface.
-2. **Lists** resource — small, and closes the loop with `updateListStatus()`.
-3. **Automations** (`/contactAutomations`) — high demand, tiny surface.
-4. **1.2 query builder** + **1.6 test helpers** — developer experience.
-5. **Bulk import** (`/import/bulk_import`) — the correct answer to "sync 10 000 contacts", which
+1. ~~**1.1 pagination**~~ — done in 1.0.
+2. **`fieldRels` / `fieldOptions`** (section 2) — makes what we already ship correct rather than
+   adding surface. Next up.
+3. **Lists** resource — small, and closes the loop with `updateListStatus()`.
+4. **Automations** (`/contactAutomations`) — high demand, tiny surface.
+5. **1.2 query builder** + **1.6 test helpers** — developer experience.
+6. **Bulk import** (`/import/bulk_import`) — the correct answer to "sync 10 000 contacts", which
    today means 10 000 requests against a 5 req/s limit.
-6. Deals / Accounts, as a second wave.
+7. Deals / Accounts, as a second wave.
 
 ## 5. Things deliberately not done
 

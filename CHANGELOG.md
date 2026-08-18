@@ -36,11 +36,17 @@ could not have worked against the real API.
   previous signatures.
 - `fieldValues()->createFieldValue(int $contactId, int $fieldId, string $value)` takes the contact id.
 - `list()` dropped its unused `$responseKey` argument; resources declare their own response key.
+- The query string passed to `list()` and friends is now parsed and re-encoded so pagination params
+  can be merged into it, so `email=john@example.com` goes out as `email=john%40example.com`.
 - `retry_sleep` now defaults to `1000` ms (was `5`).
 - Only connection errors, `429` and `5xx` responses are retried.
 
 ### Added
 
+- Pagination. `list()` takes `limit`/`offset`, `count()` reads the API's `meta.total`,
+  `paginate()` returns a `LengthAwarePaginator`, and `lazy()`/`all()` walk every page.
+  Contacts are walked with `id_greater` + `orders[id]=ASC` instead of offsets, as the API
+  recommends, falling back to offsets when the caller sets its own ordering or id bound.
 - `ListStatus`, `FieldType` and `TagType` enums.
 - `tags()->createTag()`/`updateTag()` accept a `TagType`.
 - Full Pest test suite and PHPStan level 8.

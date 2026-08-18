@@ -20,7 +20,9 @@ it('appends the query string when listing', function () {
 
     ActiveCampaign::contacts()->list('email=john@example.com');
 
-    expect(sentUrl())->toBe('https://test.api-us1.com/api/3/contacts?email=john@example.com');
+    // The query is parsed and re-encoded so pagination params can be merged into it.
+    expect(sentUrl())->toBe('https://test.api-us1.com/api/3/contacts?email=john%40example.com')
+        ->and(urldecode(sentUrl()))->toBe('https://test.api-us1.com/api/3/contacts?email=john@example.com');
 });
 
 it('gets a contact', function () {

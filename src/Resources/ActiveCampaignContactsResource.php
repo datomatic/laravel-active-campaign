@@ -6,12 +6,64 @@ use Datomatic\ActiveCampaign\Enums\ListStatus;
 use Datomatic\ActiveCampaign\Enums\Method;
 use Datomatic\ActiveCampaign\Exceptions\ActiveCampaignException;
 use Datomatic\ActiveCampaign\Support\ActiveCampaignConfig;
+use Illuminate\Support\LazyCollection;
 
 class ActiveCampaignContactsResource extends ActiveCampaignResource
 {
     protected string $resourceBasePath = 'contacts';
 
     protected ?string $responseKey = 'contacts';
+
+    /**
+     * Contacts are walked by id rather than by offset: ActiveCampaign recommends it, and a deep
+     * offset on a large account is both slow and liable to skip records while the list shifts
+     * underneath the walk. A caller that imposes its own ordering or id bound gets the generic
+     * offset walk instead, so their query keeps the meaning they gave it.
+     *
+     * @see https://developers.activecampaign.com/reference/list-all-contacts
+     *
+     * @return LazyCollection<int, array<string, mixed>>
+     */
+    public function lazy(?string $query = null, int $perPage = self::MAX_PER_PAGE): LazyCollection
+    {
+        $params = $this->queryParams($query);
+
+        if (isset($params['orders']) || isset($params['id_greater']) || isset($params['id_less'])) {
+            return parent::lazy($query, $perPage);
+        }
+
+        $perPage = $this->clampPerPage($perPage);
+
+        return LazyCollection::make(function () use ($params, $perPage) {
+            $lastId = 0;
+
+            while (true) {
+                $records = $this->listPage([
+                    ...$params,
+                    'orders' => ['id' => 'ASC'],
+                    'id_greater' => $lastId,
+                    'limit' => $perPage,
+                ])['records'];
+
+                foreach ($records as $record) {
+                    yield $record;
+                }
+
+                if (count($records) < $perPage) {
+                    return;
+                }
+
+                $nextId = intval(end($records)['id'] ?? 0);
+
+                // Without a usable id the cursor cannot advance; stop instead of looping forever.
+                if ($nextId <= $lastId) {
+                    return;
+                }
+
+                $lastId = $nextId;
+            }
+        });
+    }
 
     /**
      * Create the contact if the email is unknown, update it otherwise.

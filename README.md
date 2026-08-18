@@ -89,16 +89,73 @@ Every resource is reachable from the `ActiveCampaign` facade (or by injecting
 All of them share the same CRUD surface:
 
 ```php
-ActiveCampaign::tags()->list();              // Collection<int, array>
-ActiveCampaign::tags()->list('limit=100');   // raw query string, appended as-is
-ActiveCampaign::tags()->get(1);              // array
-ActiveCampaign::tags()->create([...]);       // array
-ActiveCampaign::tags()->update(1, [...]);    // array
-ActiveCampaign::tags()->delete(1);           // void
+ActiveCampaign::tags()->list();                    // Collection<int, array> — first page only
+ActiveCampaign::tags()->list('filters[tagType]=contact');
+ActiveCampaign::tags()->get(1);                    // array
+ActiveCampaign::tags()->create([...]);             // array
+ActiveCampaign::tags()->update(1, [...]);          // array
+ActiveCampaign::tags()->delete(1);                 // void
 ```
 
 Responses are returned as plain arrays, already unwrapped from the ActiveCampaign envelope and
 stripped of the `links` key.
+
+### Pagination
+
+The API returns **20 records per page by default and 100 at most**, so `list()` alone will quietly
+give you a slice of a large collection. Four methods cover the rest:
+
+```php
+ActiveCampaign::contacts()->list(limit: 100, offset: 200); // one page, explicitly
+ActiveCampaign::contacts()->count();                       // total matching records
+ActiveCampaign::contacts()->paginate(perPage: 50);         // LengthAwarePaginator, for views
+ActiveCampaign::contacts()->lazy();                        // LazyCollection over every page
+ActiveCampaign::contacts()->all();                         // Collection over every page
+```
+
+`lazy()` fetches one page at a time and only when you consume it, so it is the safe way to walk a
+large account:
+
+```php
+ActiveCampaign::contacts()->lazy()
+    ->filter(fn (array $contact) => $contact['email'])
+    ->each(fn (array $contact) => ProcessContact::dispatch($contact));
+```
+
+`paginate()` returns Laravel's `LengthAwarePaginator`, so `->links()` works in a Blade view:
+
+```php
+$contacts = ActiveCampaign::contacts()->paginate(perPage: 50);
+
+$contacts->total();       // from the API's meta.total
+$contacts->lastPage();
+$contacts->items();
+```
+
+A `perPage` above 100 is clamped to 100, and `count()` reads the `meta.total` the API sends back
+(it returns `0` for the few endpoints that do not report one).
+
+All of them accept the same query string as `list()`, and it is applied to every page:
+
+```php
+ActiveCampaign::contacts()->count('filters[created_after]=2024-01-01');
+ActiveCampaign::contacts()->all('filters[created_after]=2024-01-01');
+```
+
+> **Note on the query string.** It is parsed and re-encoded so that pagination params can be merged
+> into it, so `email=john@example.com` goes out as `email=john%40example.com`. When the raw query and
+> an explicit `limit`/`offset` argument set the same key, the argument wins.
+
+#### Contacts are walked by id
+
+ActiveCampaign [recommends](https://developers.activecampaign.com/reference/list-all-contacts)
+paginating contacts with `id_greater` rather than `offset`, because a deep offset on a large account
+is slow and can skip records while the list shifts underneath the walk. `contacts()->lazy()` and
+`contacts()->all()` do that for you, adding `orders[id]=ASC&id_greater=<last id>` to each page.
+
+If your query already sets `orders[...]`, `id_greater` or `id_less`, the generic offset walk is used
+instead so your ordering is preserved. `paginate()` is always offset-based, since it needs
+addressable page numbers.
 
 ### Contacts
 
