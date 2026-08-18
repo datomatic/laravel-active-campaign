@@ -46,6 +46,14 @@ could not have worked against the real API.
 - Full Pest test suite and PHPStan level 8.
 - A real README.
 
+## v0.3.0 - 2026-03-17
+
+Laravel 13 support
+
+## v0.2.3 - 2025-07-22
+
+- fix
+
 ## v0.2.2 - 2025-04-12
 
 Laravel 12
