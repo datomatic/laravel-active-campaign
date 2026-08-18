@@ -176,6 +176,110 @@ class ActiveCampaignContactsResource extends ActiveCampaignResource
     }
 
     /**
+     * The automations a contact is currently in.
+     *
+     * @return array<int, array<string, mixed>>
+     *
+     * @throws ActiveCampaignException
+     */
+    public function automations(int $contactId): array
+    {
+        return $this->request(
+            method: Method::GET,
+            path: 'contacts/'.$contactId.'/contactAutomations',
+            responseKey: 'contactAutomations'
+        );
+    }
+
+    /**
+     * Start an automation for a contact.
+     *
+     * @see https://developers.activecampaign.com/reference/create-new-contactautomation
+     *
+     * @return array<string, mixed>
+     *
+     * @throws ActiveCampaignException
+     */
+    public function addToAutomation(int $contactId, int $automationId): array
+    {
+        return $this->request(
+            method: Method::POST,
+            path: 'contactAutomations',
+            options: [
+                'contactAutomation' => [
+                    'contact' => $contactId,
+                    'automation' => $automationId,
+                ],
+            ],
+            responseKey: 'contactAutomation'
+        );
+    }
+
+    /**
+     * Remove a contact from an automation.
+     *
+     * @throws ActiveCampaignException
+     */
+    public function removeFromAutomation(int $contactId, int $automationId): void
+    {
+        $contactAutomationId = $this->getContactAutomationId($contactId, $automationId);
+
+        throw_if(
+            is_null($contactAutomationId),
+            ActiveCampaignException::contactAutomationMissing($contactId, $automationId)
+        );
+
+        $this->request(
+            method: Method::DELETE,
+            path: 'contactAutomations/'.$contactAutomationId
+        );
+    }
+
+    /**
+     * Remove a contact from an automation, ignoring an automation it is not in.
+     *
+     * @throws ActiveCampaignException
+     */
+    public function tryRemoveFromAutomation(int $contactId, int $automationId): void
+    {
+        if ($this->getContactAutomationId($contactId, $automationId)) {
+            $this->removeFromAutomation($contactId, $automationId);
+        }
+    }
+
+    /**
+     * Get the contactAutomation id of the association between a contact and an automation.
+     *
+     * @throws ActiveCampaignException
+     */
+    public function getContactAutomationId(int $contactId, int $automationId): ?int
+    {
+        foreach ($this->automations($contactId) as $contactAutomation) {
+            if (isset($contactAutomation['automation']) && intval($contactAutomation['automation']) === $automationId) {
+                return intval($contactAutomation['id']);
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * The list subscriptions of a contact, with their status.
+     *
+     * @return array<int, array<string, mixed>>
+     *
+     * @throws ActiveCampaignException
+     */
+    public function lists(int $contactId): array
+    {
+        return $this->request(
+            method: Method::GET,
+            path: 'contacts/'.$contactId.'/contactLists',
+            responseKey: 'contactLists'
+        );
+    }
+
+    /**
      * Subscribe or unsubscribe a contact from one or more lists.
      *
      * @see https://developers.activecampaign.com/reference/update-list-status-for-contact

@@ -16,6 +16,11 @@ class ActiveCampaignException extends Exception
         return new self('The tag '.$tagId.' is missing on contact '.$contactId);
     }
 
+    public static function contactAutomationMissing(int $contactId, int $automationId): self
+    {
+        return new self('The automation '.$automationId.' is missing on contact '.$contactId);
+    }
+
     /**
      * @param  array<mixed>|null  $result
      */

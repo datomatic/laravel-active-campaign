@@ -2,7 +2,8 @@
 
 Notes taken while preparing `v1.0.0`, measured against the
 [ActiveCampaign API v3 reference](https://developers.activecampaign.com/reference).
-Gaps 1.1 (pagination) and the fields gap in section 2 have since been closed; the rest still stands.
+Gaps 1.1 (pagination), fields options/relations, lists and automations have since been closed;
+the rest still stands.
 
 Nothing here blocks the 1.0 release: the package is honest about being a wrapper around four
 resources, and `request()` is public so any endpoint is reachable. This is the roadmap for 1.x.
@@ -80,16 +81,13 @@ Consumers have to hand-write `Http::fake(['*.api-us1.com/api/3/contacts' => ...]
 ### Contacts — partial
 
 Covered: list/search, retrieve, create, update, delete, sync, contact tags (list/add/remove), list
-subscription status.
+subscriptions (read and write), automation enrolments (list/add/remove).
 
 Missing:
 
 | Endpoint | Notes |
 |---|---|
-| `GET /contacts/{id}/contactLists` | read back which lists a contact is on — we can only write |
 | `GET /contacts/{id}/fieldValues` | a contact's custom field values, without a full retrieve |
-| `GET /contacts/{id}/contactAutomations` | automations the contact is in |
-| `POST /contactAutomations` / `DELETE /contactAutomations/{id}` | add/remove a contact to an automation |
 | `GET /contacts/{id}/contactDeals` | deals of a contact |
 | `GET /contacts/{id}/geoIps`, `/trackingLogs`, `/scoreValues`, `/bounceLogs`, `/contactData` | activity & enrichment data |
 | `GET /contacts/{id}/organization` | CRM account of the contact |
@@ -131,6 +129,29 @@ Still open:
 - `GET /fields/{id}` already returns `fieldOptions` and `fieldRels` alongside `field`, and `get()`
   discards them. `options()` / `relations()` each cost an extra request as a result.
 
+### Lists — done in 1.0
+
+Covered: list (with `filters[name]`), retrieve, create, delete, plus `contacts()->lists()` for a
+contact's subscriptions, which closes the loop with `updateListStatus()`.
+
+Still open:
+
+- `update()` is inherited but ActiveCampaign documents no PUT for lists, so it is unverified.
+- `/lists/{id}/contactGoalLists` and `/listGroups` (list group permissions) are not wrapped.
+
+### Automations — done in 1.0
+
+Covered: `GET /automations` and `GET /automations/{id}`, the `/contactAutomations` resource, and
+`contacts()->automations()`, `addToAutomation()`, `removeFromAutomation()`,
+`tryRemoveFromAutomation()`, `getContactAutomationId()`.
+
+Still open:
+
+- The API documents no create, update or delete for automations themselves — they are built in the
+  ActiveCampaign UI. `automations()->create()`/`update()`/`delete()` are inherited from the base
+  resource and will fail against the API; treat the resource as read only.
+- `/automations` `meta` also carries `starts`, `filtered` and `smsLogs`, which `list()` discards.
+
 ### Field values — complete
 
 Covered: list, retrieve, create, update, delete.
@@ -145,10 +166,8 @@ Roughly ordered by how often they come up.
 
 | Group | Endpoints | Note |
 |---|---|---|
-| **Lists** | `/lists`, `/lists/{id}/contactGoalLists`, `/listGroups` | conspicuous omission — we can subscribe a contact to a list id, and relate a field to one, but not discover, create or manage lists |
 | **Deals (CRM)** | `/deals`, `/dealStages`, `/dealGroups` (pipelines), `/dealCustomFieldMeta`, `/dealCustomFieldData`, `/notes`, `/dealTasks`, `/dealTasktypes` | the whole CRM half of the product |
 | **Accounts (CRM)** | `/accounts`, `/accountContacts`, `/accountCustomFieldMeta`, `/accountCustomFieldData` | B2B/organization records |
-| **Automations** | `/automations`, `/contactAutomations` | triggering an automation for a contact is a very common integration need |
 | **Campaigns** | `/campaigns`, `/campaigns/{id}/links`, `/messages` | |
 | **Webhooks** | `/webhooks`, `/webhook/events`, `/webhook/listeners` | plus no signature verification / event-to-listener helper on our side |
 | **Ecommerce (Deep Data)** | `/ecomOrders`, `/ecomCustomers`, `/ecomOrderProducts`, `/ecomOrderActivities`, `/connections` | large surface, separate concern — arguably its own package |
@@ -167,9 +186,9 @@ Roughly ordered by how often they come up.
 
 1. ~~**1.1 pagination**~~ — done in 1.0.
 2. ~~**`fieldRels` / `fieldOptions`**~~ — done in 1.0.
-3. **Lists** resource — small, and closes the loop with `updateListStatus()`. Next up.
-4. **Automations** (`/contactAutomations`) — high demand, tiny surface.
-5. **1.2 query builder** + **1.6 test helpers** — developer experience.
+3. ~~**Lists** resource~~ — done in 1.0.
+4. ~~**Automations** (`/contactAutomations`)~~ — done in 1.0.
+5. **1.2 query builder** + **1.6 test helpers** — developer experience. Next up.
 6. **Bulk import** (`/import/bulk_import`) — the correct answer to "sync 10 000 contacts", which
    today means 10 000 requests against a 5 req/s limit.
 7. Deals / Accounts, as a second wave.

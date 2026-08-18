@@ -82,6 +82,9 @@ Every resource is reachable from the `ActiveCampaign` facade (or by injecting
 | Method | Resource | ActiveCampaign endpoints |
 |---|---|---|
 | `ActiveCampaign::contacts()` | contacts, contact tags, list subscriptions | `/contacts`, `/contact/sync`, `/contactTags`, `/contactLists` |
+| `ActiveCampaign::lists()` | contact lists | `/lists` |
+| `ActiveCampaign::automations()` | automations (read only) | `/automations` |
+| `ActiveCampaign::contactAutomations()` | contact ↔ automation enrolments | `/contactAutomations` |
 | `ActiveCampaign::tags()` | tags | `/tags` |
 | `ActiveCampaign::fields()` | custom field definitions, their options and list relations | `/fields`, `/fieldOption/bulk`, `/fieldRels` |
 | `ActiveCampaign::fieldOptions()` | selectable values of a field | `/fieldOptions`, `/fieldOption/bulk` |
@@ -237,6 +240,8 @@ resolve it for you with an extra `GET` before the `DELETE`.
 ```php
 use Datomatic\ActiveCampaign\Enums\ListStatus;
 
+ActiveCampaign::contacts()->lists(1);   // current subscriptions, with their status
+
 ActiveCampaign::contacts()->updateListStatus(1, [
     2 => ListStatus::Subscribed,
     3 => ListStatus::Unsubscribed,
@@ -245,6 +250,56 @@ ActiveCampaign::contacts()->updateListStatus(1, [
 
 The array is keyed by list id. Plain integers (`1` / `2`) are accepted as well. One request per
 list is sent, because the API only accepts a single `contactList` object per call.
+
+#### Automations
+
+```php
+ActiveCampaign::contacts()->automations(1);              // automations the contact is in
+ActiveCampaign::contacts()->addToAutomation(1, 42);
+ActiveCampaign::contacts()->removeFromAutomation(1, 42); // throws if the contact is not in it
+ActiveCampaign::contacts()->tryRemoveFromAutomation(1, 42);
+
+ActiveCampaign::contacts()->getContactAutomationId(1, 42); // ?int
+```
+
+As with tags, removing needs the id of the *enrolment* rather than of the automation, so the
+remove methods resolve it with an extra `GET` before the `DELETE`.
+
+### Lists
+
+```php
+ActiveCampaign::lists()->list();
+ActiveCampaign::lists()->list('filters[name]=Newsletter');
+ActiveCampaign::lists()->get(1);
+
+ActiveCampaign::lists()->createList(
+    name: 'Newsletter',
+    stringId: 'newsletter',
+    senderUrl: 'https://example.com',
+    senderReminder: 'You subscribed on our website.',
+);
+
+ActiveCampaign::lists()->delete(1);
+```
+
+The four arguments of `createList()` are the ones the API requires; a fifth array is merged into
+the `list` object for anything else (`channel`, `user`, `send_last_broadcast`, …).
+
+> ActiveCampaign does not document an update endpoint for lists, so `lists()->update()` is
+> inherited but unverified. See [API-COVERAGE.md](API-COVERAGE.md).
+
+### Automations
+
+Automations themselves are read only in the API — you build them in the ActiveCampaign UI and
+enrol contacts through the API:
+
+```php
+ActiveCampaign::automations()->list();
+ActiveCampaign::automations()->get(42);
+
+ActiveCampaign::contactAutomations()->add(1, 42);   // same as contacts()->addToAutomation()
+ActiveCampaign::contactAutomations()->list('filters[automation]=42');
+```
 
 ### Tags
 

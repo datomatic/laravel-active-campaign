@@ -2,11 +2,14 @@
 
 namespace Datomatic\ActiveCampaign\Facades;
 
+use Datomatic\ActiveCampaign\Resources\ActiveCampaignAutomationsResource;
+use Datomatic\ActiveCampaign\Resources\ActiveCampaignContactAutomationsResource;
 use Datomatic\ActiveCampaign\Resources\ActiveCampaignContactsResource;
 use Datomatic\ActiveCampaign\Resources\ActiveCampaignFieldOptionsResource;
 use Datomatic\ActiveCampaign\Resources\ActiveCampaignFieldRelsResource;
 use Datomatic\ActiveCampaign\Resources\ActiveCampaignFieldsResource;
 use Datomatic\ActiveCampaign\Resources\ActiveCampaignFieldValuesResource;
+use Datomatic\ActiveCampaign\Resources\ActiveCampaignListsResource;
 use Datomatic\ActiveCampaign\Resources\ActiveCampaignTagsResource;
 use Illuminate\Support\Facades\Facade;
 
@@ -18,6 +21,9 @@ use Illuminate\Support\Facades\Facade;
  * @method static ActiveCampaignFieldsResource fields()
  * @method static ActiveCampaignFieldOptionsResource fieldOptions()
  * @method static ActiveCampaignFieldRelsResource fieldRels()
+ * @method static ActiveCampaignListsResource lists()
+ * @method static ActiveCampaignAutomationsResource automations()
+ * @method static ActiveCampaignContactAutomationsResource contactAutomations()
  * @method static ActiveCampaignTagsResource tags()
  */
 class ActiveCampaign extends Facade

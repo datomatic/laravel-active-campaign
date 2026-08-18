@@ -52,6 +52,11 @@ could not have worked against the real API.
   `fieldOptions()` and `fieldRels()` resources. `fields()->createField()` accepts `options:` and
   `lists:` to do the whole workflow in one call, and `FieldType::requiresOptions()` names the types
   that need options.
+- A `lists()` resource for `/lists`, and `contacts()->lists()` to read a contact's subscriptions,
+  which previously could only be written.
+- An `automations()` resource (read only, as the API documents no writes) and a
+  `contactAutomations()` resource, plus `contacts()->automations()`, `addToAutomation()`,
+  `removeFromAutomation()`, `tryRemoveFromAutomation()` and `getContactAutomationId()`.
 - `ListStatus`, `FieldType` and `TagType` enums.
 - `tags()->createTag()`/`updateTag()` accept a `TagType`.
 - Full Pest test suite and PHPStan level 8.
