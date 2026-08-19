@@ -68,7 +68,11 @@ could not have worked against the real API.
   request, `bulkAll()` splits anything larger and accepts a `LazyCollection`, and `status()`,
   `statusOf()` and `info()` read the outcome. Contacts are accepted in the same shape as
   `contacts()->sync()` and translated to the different one that endpoint expects.
-- `ListStatus`, `FieldType`, `TagType`, `FilterOperator` and `BulkImportStatus` enums.
+- CRM resources: `deals()`, `dealStages()`, `pipelines()` (the API's `dealGroups`), `accounts()`,
+  `accountContacts()` and `notes()`, each with a typed constructor. `createDeal()` takes the value
+  in cents, lower-cases the currency and refuses a deal with neither a contact nor an account.
+- `ListStatus`, `FieldType`, `TagType`, `FilterOperator`, `BulkImportStatus` and `NoteRelType`
+  enums.
 - `tags()->createTag()`/`updateTag()` accept a `TagType`.
 - Full Pest test suite and PHPStan level 8.
 - A real README.

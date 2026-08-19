@@ -2,8 +2,9 @@
 
 Notes taken while preparing `v1.0.0`, measured against the
 [ActiveCampaign API v3 reference](https://developers.activecampaign.com/reference).
-Gaps 1.1 (pagination), 1.2 (query building), 1.6 (test helpers), fields options/relations, lists,
-automations and bulk import have since been closed; the rest still stands.
+Most of it has since been closed: pagination, query building, test helpers, field options and
+relations, lists, automations, bulk import, and the core of deals and accounts. Each section says
+what is left.
 
 Nothing here blocks the 1.0 release: the package is honest about being a wrapper around four
 resources, and `request()` is public so any endpoint is reachable. This is the roadmap for 1.x.
@@ -161,6 +162,21 @@ Still open:
   resource and will fail against the API; treat the resource as read only.
 - `/automations` `meta` also carries `starts`, `filtered` and `smsLogs`, which `list()` discards.
 
+### Deals and accounts — done in 1.0
+
+Covered: `/deals`, `/dealStages`, `/dealGroups` (exposed as `pipelines()`), `/accounts`,
+`/accountContacts` and `/notes`, each with the full CRUD surface plus a typed constructor
+(`createDeal()`, `createStage()`, `createPipeline()`, `createAccount()`, `associate()`,
+`createNote()` with a `NoteRelType`).
+
+Still open in the CRM area:
+
+- `/dealCustomFieldMeta` and `/dealCustomFieldData`, and their account equivalents
+  `/accountCustomFieldMeta` and `/accountCustomFieldData`, including their bulk endpoints.
+- `/dealTasks` and `/dealTasktypes`.
+- `/dealActivities`, and deal roles.
+- `createDeal()` does not check that the stage belongs to the pipeline; the API does.
+
 ### Field values — complete
 
 Covered: list, retrieve, create, update, delete.
@@ -175,8 +191,6 @@ Roughly ordered by how often they come up.
 
 | Group | Endpoints | Note |
 |---|---|---|
-| **Deals (CRM)** | `/deals`, `/dealStages`, `/dealGroups` (pipelines), `/dealCustomFieldMeta`, `/dealCustomFieldData`, `/notes`, `/dealTasks`, `/dealTasktypes` | the whole CRM half of the product |
-| **Accounts (CRM)** | `/accounts`, `/accountContacts`, `/accountCustomFieldMeta`, `/accountCustomFieldData` | B2B/organization records |
 | **Campaigns** | `/campaigns`, `/campaigns/{id}/links`, `/messages` | |
 | **Webhooks** | `/webhooks`, `/webhook/events`, `/webhook/listeners` | plus no signature verification / event-to-listener helper on our side |
 | **Ecommerce (Deep Data)** | `/ecomOrders`, `/ecomCustomers`, `/ecomOrderProducts`, `/ecomOrderActivities`, `/connections` | large surface, separate concern — arguably its own package |
@@ -199,7 +213,12 @@ Roughly ordered by how often they come up.
 4. ~~**Automations** (`/contactAutomations`)~~ — done in 1.0.
 5. ~~**1.2 query builder** + **1.6 test helpers**~~ — done in 1.0.
 6. ~~**Bulk import** (`/import/bulk_import`)~~ — done in 1.0.
-7. Deals / Accounts, as a second wave. Next up.
+7. ~~Deals / Accounts~~ — the core is done in 1.0. What is left there (deal and account custom
+   fields, tasks, activities, roles) is listed under "Deals and accounts" above.
+
+Everything originally listed as a gap is now either closed or narrowed to a named leftover. The
+largest untouched areas remain campaigns, webhooks, ecommerce deep data, segments, forms, users
+and site tracking — see section 3.
 
 ## 5. Things deliberately not done
 

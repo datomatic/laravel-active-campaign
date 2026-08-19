@@ -86,6 +86,12 @@ Every resource is reachable from the `ActiveCampaign` facade (or by injecting
 | `ActiveCampaign::lists()` | contact lists | `/lists` |
 | `ActiveCampaign::automations()` | automations (read only) | `/automations` |
 | `ActiveCampaign::contactAutomations()` | contact ↔ automation enrolments | `/contactAutomations` |
+| `ActiveCampaign::deals()` | deals | `/deals` |
+| `ActiveCampaign::dealStages()` | stages inside a pipeline | `/dealStages` |
+| `ActiveCampaign::pipelines()` | pipelines | `/dealGroups` |
+| `ActiveCampaign::accounts()` | CRM accounts | `/accounts` |
+| `ActiveCampaign::accountContacts()` | account ↔ contact associations | `/accountContacts` |
+| `ActiveCampaign::notes()` | notes on any record | `/notes` |
 | `ActiveCampaign::tags()` | tags | `/tags` |
 | `ActiveCampaign::fields()` | custom field definitions, their options and list relations | `/fields`, `/fieldOption/bulk`, `/fieldRels` |
 | `ActiveCampaign::fieldOptions()` | selectable values of a field | `/fieldOptions`, `/fieldOption/bulk` |
@@ -383,6 +389,55 @@ ActiveCampaign::automations()->get(42);
 
 ActiveCampaign::contactAutomations()->add(1, 42);   // same as contacts()->addToAutomation()
 ActiveCampaign::contactAutomations()->list('filters[automation]=42');
+```
+
+### Deals, pipelines and accounts
+
+Pipelines are called `dealGroups` in the API; this package calls them pipelines.
+
+```php
+$pipeline = ActiveCampaign::pipelines()->createPipeline('Qualifications', [
+    'currency' => 'eur',
+    'autoassign' => 1,
+]);
+
+$stage = ActiveCampaign::dealStages()->createStage('Initial contact', $pipeline['id'], [
+    'order' => 1,
+    'color' => '32B0FC',
+]);
+
+$deal = ActiveCampaign::deals()->createDeal(
+    title: 'New business',
+    value: 150000,          // in cents
+    currency: 'eur',        // 3-letter ISO code
+    groupId: $pipeline['id'],
+    stageId: $stage['id'],
+    ownerId: 1,
+    contactId: 7,
+);
+```
+
+`value` is in cents and `currency` is lower-cased for you. A deal needs a primary contact or an
+account — passing neither throws rather than letting the API reject it.
+
+```php
+$account = ActiveCampaign::accounts()->createAccount('Example Ltd', [
+    'accountUrl' => 'https://example.com',
+    'owner' => 1,
+]);
+
+ActiveCampaign::accounts()->addContact($account['id'], 7, 'Product Manager');
+ActiveCampaign::accountContacts()->list('filters[account]='.$account['id']);
+```
+
+Notes attach to any of the record types the API supports:
+
+```php
+use Datomatic\ActiveCampaign\Enums\NoteRelType;
+
+ActiveCampaign::notes()->createNote('Called them back', 7);                        // a contact
+ActiveCampaign::notes()->createNote('Budget approved', $deal['id'], NoteRelType::Deal);
+ActiveCampaign::notes()->createNote('Renewal in March', $account['id'], NoteRelType::Account);
 ```
 
 ### Tags

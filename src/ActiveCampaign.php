@@ -2,15 +2,21 @@
 
 namespace Datomatic\ActiveCampaign;
 
+use Datomatic\ActiveCampaign\Resources\ActiveCampaignAccountContactsResource;
+use Datomatic\ActiveCampaign\Resources\ActiveCampaignAccountsResource;
 use Datomatic\ActiveCampaign\Resources\ActiveCampaignAutomationsResource;
 use Datomatic\ActiveCampaign\Resources\ActiveCampaignContactAutomationsResource;
 use Datomatic\ActiveCampaign\Resources\ActiveCampaignContactsResource;
+use Datomatic\ActiveCampaign\Resources\ActiveCampaignDealsResource;
+use Datomatic\ActiveCampaign\Resources\ActiveCampaignDealStagesResource;
 use Datomatic\ActiveCampaign\Resources\ActiveCampaignFieldOptionsResource;
 use Datomatic\ActiveCampaign\Resources\ActiveCampaignFieldRelsResource;
 use Datomatic\ActiveCampaign\Resources\ActiveCampaignFieldsResource;
 use Datomatic\ActiveCampaign\Resources\ActiveCampaignFieldValuesResource;
 use Datomatic\ActiveCampaign\Resources\ActiveCampaignImportResource;
 use Datomatic\ActiveCampaign\Resources\ActiveCampaignListsResource;
+use Datomatic\ActiveCampaign\Resources\ActiveCampaignNotesResource;
+use Datomatic\ActiveCampaign\Resources\ActiveCampaignPipelinesResource;
 use Datomatic\ActiveCampaign\Resources\ActiveCampaignTagsResource;
 
 class ActiveCampaign
@@ -58,6 +64,36 @@ class ActiveCampaign
     public function contactAutomations(): ActiveCampaignContactAutomationsResource
     {
         return resolve(ActiveCampaignContactAutomationsResource::class);
+    }
+
+    public function deals(): ActiveCampaignDealsResource
+    {
+        return resolve(ActiveCampaignDealsResource::class);
+    }
+
+    public function dealStages(): ActiveCampaignDealStagesResource
+    {
+        return resolve(ActiveCampaignDealStagesResource::class);
+    }
+
+    public function pipelines(): ActiveCampaignPipelinesResource
+    {
+        return resolve(ActiveCampaignPipelinesResource::class);
+    }
+
+    public function accounts(): ActiveCampaignAccountsResource
+    {
+        return resolve(ActiveCampaignAccountsResource::class);
+    }
+
+    public function accountContacts(): ActiveCampaignAccountContactsResource
+    {
+        return resolve(ActiveCampaignAccountContactsResource::class);
+    }
+
+    public function notes(): ActiveCampaignNotesResource
+    {
+        return resolve(ActiveCampaignNotesResource::class);
     }
 
     public function tags(): ActiveCampaignTagsResource

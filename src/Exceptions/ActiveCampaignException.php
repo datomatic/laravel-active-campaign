@@ -16,6 +16,14 @@ class ActiveCampaignException extends Exception
         return new self('The tag '.$tagId.' is missing on contact '.$contactId);
     }
 
+    /**
+     * @param  array<int, string>  $fields
+     */
+    public static function missingOneOf(string $path, array $fields): self
+    {
+        return new self('One of "'.implode('", "', $fields).'" is required on '.$path.' request');
+    }
+
     public static function batchTooLarge(int $size, int $max): self
     {
         return new self('A bulk import accepts at most '.$max.' contacts per request, '.$size.' given');
