@@ -2,13 +2,15 @@
 
 All notable changes to `laravel-active-campaign` will be documented in this file.
 
-## v1.0.0 - 2026-08-18
+## v1.0.0 - 2026-08-19
 
 First stable release. It contains breaking changes over `0.2.x`, all of them fixes to calls that
 could not have worked against the real API.
 
 ### Fixed
 
+- The README documented `--tag="laravel-active-campaign-config"` for publishing the config, which
+  publishes nothing: the tag is built from the package short name, so it is `active-campaign-config`.
 - `contacts()->sync()` posted to `contacts/sync`; the endpoint is `contact/sync`.
 - `contacts()->create()`/`sync()` sent `fieldValues` as a top-level key; the API expects it nested
   inside the `contact` object, so custom fields were silently dropped.

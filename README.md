@@ -36,7 +36,7 @@ composer require datomatic/laravel-active-campaign
 Publish the config file:
 
 ```bash
-php artisan vendor:publish --tag="laravel-active-campaign-config"
+php artisan vendor:publish --tag="active-campaign-config"
 ```
 
 Then add your credentials to `.env`:

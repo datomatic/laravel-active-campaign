@@ -52,3 +52,34 @@ it('exposes request() as an escape hatch for unwrapped endpoints', function () {
     expect($lists)->toBe([['id' => '1', 'name' => 'Newsletter']]);
     expect(sentUrl())->toBe('https://test.api-us1.com/api/3/lists');
 });
+
+/**
+ * The facade's only contract with an IDE is its @method docblock, and nothing enforces it,
+ * so a resource added to the manager can silently stay invisible to autocompletion.
+ */
+it('documents every manager method on the facade', function () {
+    $manager = collect((new ReflectionClass(ActiveCampaign::class))->getMethods(ReflectionMethod::IS_PUBLIC))
+        ->reject(fn (ReflectionMethod $method) => $method->isStatic() || $method->isConstructor())
+        ->map(fn (ReflectionMethod $method) => $method->getName())
+        ->sort()->values();
+
+    $docblock = (new ReflectionClass(Datomatic\ActiveCampaign\Facades\ActiveCampaign::class))->getDocComment();
+
+    preg_match_all('/@method static \S+ (\w+)\(/', (string) $docblock, $matches);
+
+    expect(collect($matches[1])->sort()->values()->all())->toBe($manager->all());
+});
+
+it('returns the documented resource class for every manager method', function () {
+    $manager = resolve(ActiveCampaign::class);
+
+    foreach ((new ReflectionClass(ActiveCampaign::class))->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
+        if ($method->isConstructor()) {
+            continue;
+        }
+
+        $returnType = (string) $method->getReturnType();
+
+        expect($manager->{$method->getName()}())->toBeInstanceOf($returnType);
+    }
+});
