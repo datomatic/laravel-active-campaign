@@ -16,6 +16,11 @@ class ActiveCampaignException extends Exception
         return new self('The tag '.$tagId.' is missing on contact '.$contactId);
     }
 
+    public static function batchTooLarge(int $size, int $max): self
+    {
+        return new self('A bulk import accepts at most '.$max.' contacts per request, '.$size.' given');
+    }
+
     public static function contactAutomationMissing(int $contactId, int $automationId): self
     {
         return new self('The automation '.$automationId.' is missing on contact '.$contactId);

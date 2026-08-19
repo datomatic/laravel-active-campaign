@@ -9,6 +9,7 @@ use Datomatic\ActiveCampaign\Resources\ActiveCampaignFieldOptionsResource;
 use Datomatic\ActiveCampaign\Resources\ActiveCampaignFieldRelsResource;
 use Datomatic\ActiveCampaign\Resources\ActiveCampaignFieldsResource;
 use Datomatic\ActiveCampaign\Resources\ActiveCampaignFieldValuesResource;
+use Datomatic\ActiveCampaign\Resources\ActiveCampaignImportResource;
 use Datomatic\ActiveCampaign\Resources\ActiveCampaignListsResource;
 use Datomatic\ActiveCampaign\Resources\ActiveCampaignTagsResource;
 
@@ -37,6 +38,11 @@ class ActiveCampaign
     public function fieldRels(): ActiveCampaignFieldRelsResource
     {
         return resolve(ActiveCampaignFieldRelsResource::class);
+    }
+
+    public function import(): ActiveCampaignImportResource
+    {
+        return resolve(ActiveCampaignImportResource::class);
     }
 
     public function lists(): ActiveCampaignListsResource

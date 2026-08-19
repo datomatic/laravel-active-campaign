@@ -9,6 +9,7 @@ use Datomatic\ActiveCampaign\Resources\ActiveCampaignFieldOptionsResource;
 use Datomatic\ActiveCampaign\Resources\ActiveCampaignFieldRelsResource;
 use Datomatic\ActiveCampaign\Resources\ActiveCampaignFieldsResource;
 use Datomatic\ActiveCampaign\Resources\ActiveCampaignFieldValuesResource;
+use Datomatic\ActiveCampaign\Resources\ActiveCampaignImportResource;
 use Datomatic\ActiveCampaign\Resources\ActiveCampaignListsResource;
 use Datomatic\ActiveCampaign\Resources\ActiveCampaignTagsResource;
 use Illuminate\Support\Facades\Facade;
@@ -21,6 +22,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static ActiveCampaignFieldsResource fields()
  * @method static ActiveCampaignFieldOptionsResource fieldOptions()
  * @method static ActiveCampaignFieldRelsResource fieldRels()
+ * @method static ActiveCampaignImportResource import()
  * @method static ActiveCampaignListsResource lists()
  * @method static ActiveCampaignAutomationsResource automations()
  * @method static ActiveCampaignContactAutomationsResource contactAutomations()

@@ -2,7 +2,7 @@
 
 namespace Datomatic\ActiveCampaign\Resources;
 
-use Datomatic\ActiveCampaign\Contracts\ActiveCampaignClientContract;
+use Datomatic\ActiveCampaign\Concerns\SendsRequests;
 use Datomatic\ActiveCampaign\Contracts\ActiveCampaignResourceContract;
 use Datomatic\ActiveCampaign\Enums\Method;
 use Datomatic\ActiveCampaign\Exceptions\ActiveCampaignException;
@@ -14,6 +14,8 @@ use Illuminate\Support\LazyCollection;
 
 abstract class ActiveCampaignResource implements ActiveCampaignResourceContract
 {
+    use SendsRequests;
+
     /**
      * The API rejects anything above this, whatever we ask for.
      *
@@ -26,36 +28,6 @@ abstract class ActiveCampaignResource implements ActiveCampaignResourceContract
     protected string $resourceBasePath = '';
 
     protected ?string $responseKey = null;
-
-    public function __construct(
-        private readonly ActiveCampaignClientContract $client,
-    ) {}
-
-    public function client(): ActiveCampaignClientContract
-    {
-        return $this->client;
-    }
-
-    /**
-     * @param  array<string, mixed>  $options
-     * @return array<mixed>
-     *
-     * @throws ActiveCampaignException
-     */
-    public function request(Method $method, string $path = '', array $options = [], ?string $responseKey = null): array
-    {
-        $response = $this->client()->send(
-            method: $method,
-            url: $path,
-            data: $options
-        );
-
-        if ($response->failed()) {
-            throw ActiveCampaignException::requestError($path, $response->json());
-        }
-
-        return $response->json($responseKey) ?? [];
-    }
 
     /**
      * List all resources, search resources, or filter resources by query defined criteria.

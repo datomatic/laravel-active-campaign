@@ -64,7 +64,11 @@ could not have worked against the real API.
   `DateTimeInterface` values.
 - `ActiveCampaignFake` for testing consumer code: fake by path relative to `/api/3`, build list,
   single and error envelopes, and assert on method, path and JSON body.
-- `ListStatus`, `FieldType` and `TagType` enums.
+- An `import()` resource for the bulk contact importer: `bulk()` queues up to 250 contacts per
+  request, `bulkAll()` splits anything larger and accepts a `LazyCollection`, and `status()`,
+  `statusOf()` and `info()` read the outcome. Contacts are accepted in the same shape as
+  `contacts()->sync()` and translated to the different one that endpoint expects.
+- `ListStatus`, `FieldType`, `TagType`, `FilterOperator` and `BulkImportStatus` enums.
 - `tags()->createTag()`/`updateTag()` accept a `TagType`.
 - Full Pest test suite and PHPStan level 8.
 - A real README.

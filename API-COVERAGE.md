@@ -2,8 +2,8 @@
 
 Notes taken while preparing `v1.0.0`, measured against the
 [ActiveCampaign API v3 reference](https://developers.activecampaign.com/reference).
-Gaps 1.1 (pagination), 1.2 (query building), 1.6 (test helpers), fields options/relations, lists
-and automations have since been closed; the rest still stands.
+Gaps 1.1 (pagination), 1.2 (query building), 1.6 (test helpers), fields options/relations, lists,
+automations and bulk import have since been closed; the rest still stands.
 
 Nothing here blocks the 1.0 release: the package is honest about being a wrapper around four
 resources, and `request()` is public so any endpoint is reachable. This is the roadmap for 1.x.
@@ -89,9 +89,8 @@ Missing:
 | `GET /contacts/{id}/contactDeals` | deals of a contact |
 | `GET /contacts/{id}/geoIps`, `/trackingLogs`, `/scoreValues`, `/bounceLogs`, `/contactData` | activity & enrichment data |
 | `GET /contacts/{id}/organization` | CRM account of the contact |
-| `POST /import/bulk_import` | bulk import, up to 250 contacts per call — the right tool for big syncs |
-| `GET /import/info`, `GET /import/bulk_import/{batchId}/status` | bulk import status |
 | `DELETE /contacts/bulk_delete` | bulk delete |
+| `POST /contacts/bulk_edit` | bulk tag/list edits |
 
 `sync()` also ignores the `tags` key that the API accepts inside `contact` (additive, auto-creates
 tags) — supporting it would remove the separate `tag()` round-trip in the common case.
@@ -126,6 +125,18 @@ Still open:
   it via `ActiveCampaignFieldRelsResource::ALL_LISTS`; pass real list ids when you know them.
 - `GET /fields/{id}` already returns `fieldOptions` and `fieldRels` alongside `field`, and `get()`
   discards them. `options()` / `relations()` each cost an extra request as a result.
+
+### Bulk import — done in 1.0
+
+Covered: `POST /import/bulk_import` (`import()->bulk()`, with `bulkAll()` chunking at the API's
+250-contact ceiling and accepting a `LazyCollection`), `GET /import/info` (`status()`, `statusOf()`
+returning a `BulkImportStatus`) and `GET /import/bulk_import` (`info()`).
+
+The importer names contact fields differently from the rest of the API (`first_name`, not
+`firstName`; `fields: [{id, value}]`, not `fieldValues: [{field, value}]`), so the resource accepts
+both spellings and translates.
+
+Still open: `DELETE /contacts/bulk_delete` and `POST /contacts/bulk_edit`.
 
 ### Lists — done in 1.0
 
@@ -187,9 +198,8 @@ Roughly ordered by how often they come up.
 3. ~~**Lists** resource~~ — done in 1.0.
 4. ~~**Automations** (`/contactAutomations`)~~ — done in 1.0.
 5. ~~**1.2 query builder** + **1.6 test helpers**~~ — done in 1.0.
-6. **Bulk import** (`/import/bulk_import`) — the correct answer to "sync 10 000 contacts", which
-   today means 10 000 requests against a 5 req/s limit. Next up.
-7. Deals / Accounts, as a second wave.
+6. ~~**Bulk import** (`/import/bulk_import`)~~ — done in 1.0.
+7. Deals / Accounts, as a second wave. Next up.
 
 ## 5. Things deliberately not done
 

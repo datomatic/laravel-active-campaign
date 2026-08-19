@@ -82,6 +82,7 @@ Every resource is reachable from the `ActiveCampaign` facade (or by injecting
 | Method | Resource | ActiveCampaign endpoints |
 |---|---|---|
 | `ActiveCampaign::contacts()` | contacts, contact tags, list subscriptions | `/contacts`, `/contact/sync`, `/contactTags`, `/contactLists` |
+| `ActiveCampaign::import()` | bulk contact importer | `/import/bulk_import`, `/import/info` |
 | `ActiveCampaign::lists()` | contact lists | `/lists` |
 | `ActiveCampaign::automations()` | automations (read only) | `/automations` |
 | `ActiveCampaign::contactAutomations()` | contact ↔ automation enrolments | `/contactAutomations` |
@@ -298,6 +299,55 @@ ActiveCampaign::contacts()->getContactAutomationId(1, 42); // ?int
 
 As with tags, removing needs the id of the *enrolment* rather than of the automation, so the
 remove methods resolve it with an extra `GET` before the `DELETE`.
+
+### Bulk import
+
+Writing contacts one at a time means one request each, against a limit of 5 requests per second.
+The importer queues up to 250 contacts per request instead:
+
+```php
+use Datomatic\ActiveCampaign\Enums\BulkImportStatus;
+
+$result = ActiveCampaign::import()->bulk([
+    ['email' => 'a@example.com', 'firstName' => 'Jane', 'city' => 'Rome'],
+    ['email' => 'b@example.com', 'tags' => ['customer'], 'subscribe' => [1, 2]],
+]);
+
+$result['batchId']; // "0641fbdd-..."
+```
+
+Contacts are accepted in the same shape as `contacts()->sync()` — `firstName`, `lastName` and the
+custom field names from your config — and translated to the different one this endpoint expects
+(`first_name`, `fields: [{id, value}]`). Its own keys are passed through untouched if you prefer
+writing them directly, and `subscribe`/`unsubscribe` accept plain list ids as well as
+`[['listid' => 1]]`.
+
+`bulkAll()` splits anything larger into batches the API accepts, and takes a `LazyCollection` so a
+large import never has to sit in memory:
+
+```php
+$batches = ActiveCampaign::import()->bulkAll(
+    User::lazy()->map(fn (User $user) => ['email' => $user->email, 'firstName' => $user->name]),
+);
+```
+
+The import is asynchronous, so poll for the outcome:
+
+```php
+$status = ActiveCampaign::import()->statusOf($result['batchId']); // ?BulkImportStatus
+
+if ($status?->isFinished()) {
+    $info = ActiveCampaign::import()->status($result['batchId']);
+
+    $info['success']; // ids of the contacts created
+    $info['failure']; // emails the API rejected
+}
+
+ActiveCampaign::import()->info(); // outstanding and recently completed batches, account wide
+```
+
+`statusOf()` returns `null` while the API has not set a status yet, which is the case for the first
+moment after queueing — leave a short delay before polling.
 
 ### Lists
 
