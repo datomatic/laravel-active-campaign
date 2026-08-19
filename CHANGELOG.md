@@ -2,6 +2,48 @@
 
 All notable changes to `laravel-active-campaign` will be documented in this file.
 
+## v2.0.0 - 2026-08-19
+
+Takes the package from "works if you squint" to something publishable as 1.0.
+
+### Fixes for calls that could not have worked
+
+Each is now covered by a test asserting the exact URL, method and JSON body.
+
+| Where | Defect |
+|---|---|
+| `contacts()->sync()` | posted to `contacts/sync`; the endpoint is `contact/sync`, so every call 404'd |
+| `contacts()->create()`/`sync()` | sent `fieldValues` top-level; the API nests it inside `contact`, so custom fields were silently dropped |
+| `contacts()->getContactTagId()` | read a `tag_id` key the API never returns (it is `tag`), so `untag()` never removed anything |
+| `contacts()->untag()` | built an exception without throwing it |
+| `contacts()->updateListStatus()` | sent a `contactLists` array; the API takes one `contactList` per request |
+| `fieldValues()->createFieldValue()` | omitted the required `contact` id |
+| `fields()->createField()` | was a copy of the fieldValues method and sent the wrong payload entirely |
+| client | retried `4xx`, and leaked `RequestException`; `GET`/`DELETE` sent an empty JSON body |
+| service provider | held the client as a singleton, reusing a stateful `PendingRequest` |
+| README | documented a `vendor:publish` tag that matches nothing, so the first install step published no file |
+| `phpunit.xml.dist` | declared coverage outputs, which makes PHPUnit 12 abort silently with no driver — CI would have reported success having run zero tests |
+
+### Supported versions
+
+Laravel 13 has been out since February and the package capped at 12, while every release of Laravel 10 and 11 is blocked by security advisories — two of three claimed majors could not be installed under Composer's default policy. Now **PHP 8.3+, Laravel 12 or 13**. The CI matrix also excluded a combination Laravel supports; all eight jobs it now runs were verified to resolve.
+
+### Added
+
+- **Pagination.** `list()` returned the first page and discarded `meta`, so a 4 000-contact account silently yielded 20. Adds `limit`/`offset`, `count()`, `paginate()` and `lazy()`/`all()`. Contacts walk by `id_greater` as the API recommends, falling back to offsets when the caller sets its own ordering.
+- **Field options and list relations.** A created custom field was unusable without them.
+- **Lists, automations, deals, pipelines, accounts, notes** resources.
+- **Bulk import**, with batching at the API's 250-contact ceiling and a `LazyCollection` input.
+- **`Query` builder** and **`ActiveCampaignFake`** testing helpers.
+
+### Docs
+
+Real README, plus `API-COVERAGE.md` (what is and is not wrapped) and `ROADMAP.md` (25 numbered items still to build).
+
+### Checks
+
+227 tests, PHPStan level 8 (was 4, baseline deleted), Pint clean.
+
 ## v1.0.0 - 2026-08-19
 
 First stable release. It contains breaking changes over `0.2.x`, all of them fixes to calls that
