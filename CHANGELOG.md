@@ -9,6 +9,9 @@ could not have worked against the real API.
 
 ### Fixed
 
+- `phpunit.xml.dist` declared coverage report outputs, which makes PHPUnit 12 abort the run in
+  silence when no coverage driver is present — as in CI, where `coverage: none` is set. The suite
+  would have reported success having run no tests. Coverage is now requested on the command line.
 - The README documented `--tag="laravel-active-campaign-config"` for publishing the config, which
   publishes nothing: the tag is built from the package short name, so it is `active-campaign-config`.
 - `contacts()->sync()` posted to `contacts/sync`; the endpoint is `contact/sync`.
@@ -32,7 +35,9 @@ could not have worked against the real API.
 
 ### Changed
 
-- Requires PHP 8.2+ and Laravel 10, 11 or 12.
+- Requires PHP 8.3+ and Laravel 12 or 13. Laravel 10 and 11 are past security support and every
+  release of both is blocked by advisories, so neither could be installed under Composer's default
+  policy anyway.
 - Every failing request now throws `ActiveCampaignException` only; `RequestException` no longer
   leaks out of the package.
 - `fields()->createField(string $title, FieldType $type, array $attributes)` and

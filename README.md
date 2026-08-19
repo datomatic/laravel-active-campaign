@@ -24,8 +24,8 @@ ActiveCampaign::contacts()->tag($contact['id'], 5);
 
 ## Requirements
 
-- PHP 8.2+
-- Laravel 10, 11 or 12
+- PHP 8.3+
+- Laravel 12 or 13
 
 ## Installation
 
