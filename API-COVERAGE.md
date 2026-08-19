@@ -6,8 +6,9 @@ Most of it has since been closed: pagination, query building, test helpers, fiel
 relations, lists, automations, bulk import, and the core of deals and accounts. Each section says
 what is left.
 
-Nothing here blocks the 1.0 release: the package is honest about being a wrapper around four
-resources, and `request()` is public so any endpoint is reachable. This is the roadmap for 1.x.
+`request()` is public on every resource, so any endpoint is reachable whether or not it is wrapped.
+
+This file records coverage. The work that remains lives in [ROADMAP.md](ROADMAP.md).
 
 ---
 
@@ -205,25 +206,12 @@ Roughly ordered by how often they come up.
 
 ---
 
-## 4. Suggested order of work after 1.0
+## 4. What is left
 
-1. ~~**1.1 pagination**~~ — done in 1.0.
-2. ~~**`fieldRels` / `fieldOptions`**~~ — done in 1.0.
-3. ~~**Lists** resource~~ — done in 1.0.
-4. ~~**Automations** (`/contactAutomations`)~~ — done in 1.0.
-5. ~~**1.2 query builder** + **1.6 test helpers**~~ — done in 1.0.
-6. ~~**Bulk import** (`/import/bulk_import`)~~ — done in 1.0.
-7. ~~Deals / Accounts~~ — the core is done in 1.0. What is left there (deal and account custom
-   fields, tasks, activities, roles) is listed under "Deals and accounts" above.
-
-Everything originally listed as a gap is now either closed or narrowed to a named leftover. The
-largest untouched areas remain campaigns, webhooks, ecommerce deep data, segments, forms, users
-and site tracking — see section 3.
+Every "still open" note above, plus the groups in section 3, is collected and prioritised in
+[ROADMAP.md](ROADMAP.md).
 
 ## 5. Things deliberately not done
 
-- **DTOs / typed responses.** Arrays keep the wrapper thin and forward-compatible with API changes.
-  Revisit only if the package grows past ~10 resources.
-- **Ecommerce Deep Data.** Big enough to deserve `datomatic/laravel-active-campaign-ecommerce`.
-- **Site tracking.** Different host, different credentials (`actid` + event key); mixing it into the
-  same client would muddy the config.
+DTOs, Ecommerce Deep Data and site tracking were left out on purpose rather than overlooked. The
+reasoning, and what revisiting each would involve, is in [ROADMAP.md](ROADMAP.md) section 3.

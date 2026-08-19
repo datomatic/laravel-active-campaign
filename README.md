@@ -635,8 +635,12 @@ composer format
 
 ## Roadmap
 
-[API-COVERAGE.md](API-COVERAGE.md) lists exactly which ActiveCampaign endpoints this package wraps,
-which it doesn't, and what is planned for 1.x.
+[API-COVERAGE.md](API-COVERAGE.md) lists exactly which ActiveCampaign endpoints this package wraps
+and which it doesn't. [ROADMAP.md](ROADMAP.md) is what is still to be built, in the order it is
+worth doing.
+
+An endpoint the package does not wrap is still one line away — see
+[Escape hatches](#escape-hatches).
 
 ## Changelog
 
