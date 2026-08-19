@@ -54,7 +54,7 @@ class ActiveCampaignListsResource extends ActiveCampaignResource
      */
     protected function responseCast(array $response): array
     {
-        $responseCast = $response['list'];
+        $responseCast = $response['list'] ?? [];
 
         unset($responseCast['links']);
 

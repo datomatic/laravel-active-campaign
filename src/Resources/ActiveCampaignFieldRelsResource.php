@@ -50,7 +50,7 @@ class ActiveCampaignFieldRelsResource extends ActiveCampaignResource
      */
     protected function responseCast(array $response): array
     {
-        $responseCast = $response['fieldRel'];
+        $responseCast = $response['fieldRel'] ?? [];
 
         unset($responseCast['links']);
 

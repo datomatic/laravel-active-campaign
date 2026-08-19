@@ -2,8 +2,8 @@
 
 Notes taken while preparing `v1.0.0`, measured against the
 [ActiveCampaign API v3 reference](https://developers.activecampaign.com/reference).
-Gaps 1.1 (pagination), fields options/relations, lists and automations have since been closed;
-the rest still stands.
+Gaps 1.1 (pagination), 1.2 (query building), 1.6 (test helpers), fields options/relations, lists
+and automations have since been closed; the rest still stands.
 
 Nothing here blocks the 1.0 release: the package is honest about being a wrapper around four
 resources, and `request()` is public so any endpoint is reachable. This is the roadmap for 1.x.
@@ -38,17 +38,15 @@ Still open:
 - `paginate()` has no cursor variant, so deep page numbers on contacts remain offset-based and slow.
   A `cursorPaginate()` would fix that, at the cost of losing addressable page numbers.
 
-### 1.2 Query building
+### 1.2 Query building — done in 1.0
 
-`list()` takes a raw query string. The API's filter syntax is verbose and easy to get wrong:
+`Datomatic\ActiveCampaign\Support\Query` builds the `filters[...]` / `orders[...]` syntax, is
+accepted anywhere a query string is, and normalises booleans, backed enums, arrays and dates.
+`where()` covers the top-level params the API defines outside `filters` (contacts' `email`,
+`search`, `segmentid`, `listid`, `tagid`, `id_greater`).
 
-```
-filters[created_after]=2024-01-01&orders[cdate]=DESC&include=contactTags&limit=100
-```
-
-A small fluent builder (`->filter('email', $x)->orderBy('cdate', 'DESC')->include('contactTags')`)
-would remove most of the string juggling. Note that filter support differs per endpoint — contacts
-also accept the legacy top-level `email=`, `search=`, `segmentid=`, `listid=`, `tagid=` params.
+Still open: filter support differs per endpoint and the builder does not know which fields each
+endpoint accepts, so a wrong field name is still only caught by the API.
 
 ### 1.3 Rate limiting
 
@@ -69,10 +67,10 @@ Nothing is dispatched, so consumers cannot hook into "contact synced" / "request
 wrapping every call. Laravel's own `Illuminate\Http\Client\Events\ResponseReceived` fires, but it is
 not scoped to this package.
 
-### 1.6 Testing helpers not exposed
+### 1.6 Testing helpers — done in 1.0
 
-Consumers have to hand-write `Http::fake(['*.api-us1.com/api/3/contacts' => ...])`. A shipped
-`ActiveCampaign::fake()` / response factory would be a small, high-value addition.
+`Datomatic\ActiveCampaign\Testing\ActiveCampaignFake` fakes by path relative to `/api/3`, builds
+list/single/error envelopes, and asserts on method, path and JSON body.
 
 ---
 
@@ -188,9 +186,9 @@ Roughly ordered by how often they come up.
 2. ~~**`fieldRels` / `fieldOptions`**~~ — done in 1.0.
 3. ~~**Lists** resource~~ — done in 1.0.
 4. ~~**Automations** (`/contactAutomations`)~~ — done in 1.0.
-5. **1.2 query builder** + **1.6 test helpers** — developer experience. Next up.
+5. ~~**1.2 query builder** + **1.6 test helpers**~~ — done in 1.0.
 6. **Bulk import** (`/import/bulk_import`) — the correct answer to "sync 10 000 contacts", which
-   today means 10 000 requests against a 5 req/s limit.
+   today means 10 000 requests against a 5 req/s limit. Next up.
 7. Deals / Accounts, as a second wave.
 
 ## 5. Things deliberately not done

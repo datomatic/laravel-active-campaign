@@ -42,7 +42,7 @@ class ActiveCampaignContactAutomationsResource extends ActiveCampaignResource
      */
     protected function responseCast(array $response): array
     {
-        $responseCast = $response['contactAutomation'];
+        $responseCast = $response['contactAutomation'] ?? [];
 
         unset($responseCast['links']);
 

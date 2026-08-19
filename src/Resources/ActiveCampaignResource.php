@@ -6,6 +6,7 @@ use Datomatic\ActiveCampaign\Contracts\ActiveCampaignClientContract;
 use Datomatic\ActiveCampaign\Contracts\ActiveCampaignResourceContract;
 use Datomatic\ActiveCampaign\Enums\Method;
 use Datomatic\ActiveCampaign\Exceptions\ActiveCampaignException;
+use Datomatic\ActiveCampaign\Support\Query;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Collection;
@@ -66,7 +67,7 @@ abstract class ActiveCampaignResource implements ActiveCampaignResourceContract
      *
      * @throws ActiveCampaignException
      */
-    public function list(?string $query = null, ?int $limit = null, ?int $offset = null): Collection
+    public function list(Query|string|null $query = null, ?int $limit = null, ?int $offset = null): Collection
     {
         return collect($this->listPage($this->queryParams($query, array_filter([
             'limit' => $limit,
@@ -81,7 +82,7 @@ abstract class ActiveCampaignResource implements ActiveCampaignResourceContract
      *
      * @throws ActiveCampaignException
      */
-    public function count(?string $query = null): int
+    public function count(Query|string|null $query = null): int
     {
         return $this->listPage($this->queryParams($query, ['limit' => 1, 'offset' => 0]))['total'] ?? 0;
     }
@@ -93,7 +94,7 @@ abstract class ActiveCampaignResource implements ActiveCampaignResourceContract
      *
      * @throws ActiveCampaignException
      */
-    public function paginate(int $perPage = self::DEFAULT_PER_PAGE, ?int $page = null, ?string $query = null): LengthAwarePaginator
+    public function paginate(int $perPage = self::DEFAULT_PER_PAGE, ?int $page = null, Query|string|null $query = null): LengthAwarePaginator
     {
         $perPage = $this->clampPerPage($perPage);
         $page = max($page ?? Paginator::resolveCurrentPage(), 1);
@@ -117,7 +118,7 @@ abstract class ActiveCampaignResource implements ActiveCampaignResourceContract
      *
      * @return LazyCollection<int, array<string, mixed>>
      */
-    public function lazy(?string $query = null, int $perPage = self::MAX_PER_PAGE): LazyCollection
+    public function lazy(Query|string|null $query = null, int $perPage = self::MAX_PER_PAGE): LazyCollection
     {
         $perPage = $this->clampPerPage($perPage);
 
@@ -146,7 +147,7 @@ abstract class ActiveCampaignResource implements ActiveCampaignResourceContract
      *
      * @throws ActiveCampaignException
      */
-    public function all(?string $query = null, int $perPage = self::MAX_PER_PAGE): Collection
+    public function all(Query|string|null $query = null, int $perPage = self::MAX_PER_PAGE): Collection
     {
         return $this->lazy($query, $perPage)->collect();
     }
@@ -241,17 +242,19 @@ abstract class ActiveCampaignResource implements ActiveCampaignResourceContract
     }
 
     /**
-     * Merge the caller's raw query string with the params we control.
+     * Merge the caller's query with the params we control.
      * Ours win on a collision, so pagination stays reliable.
      *
      * @param  array<array-key, mixed>  $overrides
      * @return array<array-key, mixed>
      */
-    protected function queryParams(?string $query, array $overrides = []): array
+    protected function queryParams(Query|string|null $query, array $overrides = []): array
     {
         $params = [];
 
-        if (! is_null($query) && $query !== '') {
+        if ($query instanceof Query) {
+            $params = $query->toArray();
+        } elseif (! is_null($query) && $query !== '') {
             parse_str(ltrim($query, '?'), $params);
         }
 

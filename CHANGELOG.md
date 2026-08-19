@@ -25,6 +25,8 @@ could not have worked against the real API.
   `Illuminate\Http\Client\RequestException` instead of `ActiveCampaignException`.
 - `GET` and `DELETE` requests no longer send an empty JSON body.
 - The client is no longer a singleton: a `PendingRequest` is stateful and must not be reused.
+- A `200` whose body did not carry the expected envelope key raised an undefined-key error instead
+  of returning an empty array.
 
 ### Changed
 
@@ -57,6 +59,11 @@ could not have worked against the real API.
 - An `automations()` resource (read only, as the API documents no writes) and a
   `contactAutomations()` resource, plus `contacts()->automations()`, `addToAutomation()`,
   `removeFromAutomation()`, `tryRemoveFromAutomation()` and `getContactAutomationId()`.
+- A `Query` builder for the API's `filters[...]` / `orders[...]` syntax, accepted anywhere a query
+  string is, with a `FilterOperator` enum and normalisation of booleans, backed enums, arrays and
+  `DateTimeInterface` values.
+- `ActiveCampaignFake` for testing consumer code: fake by path relative to `/api/3`, build list,
+  single and error envelopes, and assert on method, path and JSON body.
 - `ListStatus`, `FieldType` and `TagType` enums.
 - `tags()->createTag()`/`updateTag()` accept a `TagType`.
 - Full Pest test suite and PHPStan level 8.

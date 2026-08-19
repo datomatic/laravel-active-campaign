@@ -151,6 +151,40 @@ ActiveCampaign::contacts()->all('filters[created_after]=2024-01-01');
 > into it, so `email=john@example.com` goes out as `email=john%40example.com`. When the raw query and
 > an explicit `limit`/`offset` argument set the same key, the argument wins.
 
+### Building queries
+
+Anywhere a query string is accepted you can pass a `Query` instead, which spares you the API's
+`filters[...]` / `orders[...]` syntax:
+
+```php
+use Datomatic\ActiveCampaign\Enums\FilterOperator;
+use Datomatic\ActiveCampaign\Support\Query;
+
+$contacts = ActiveCampaign::contacts()->all(
+    Query::make()
+        ->filter('created_after', new DateTimeImmutable('-30 days'), FilterOperator::GreaterThan)
+        ->filter('status', 1)
+        ->orderByDesc('cdate')
+        ->include('contactTags')
+);
+```
+
+| Method | Produces |
+|---|---|
+| `filter('email', 'a@b.c')` | `filters[email]=a@b.c` |
+| `filter('cdate', $date, FilterOperator::GreaterThan)` | `filters[cdate][gt]=...` |
+| `filters(['a' => 1, 'b' => 2])` | several equality filters at once |
+| `orderBy('cdate')` / `orderByDesc('cdate')` | `orders[cdate]=ASC` / `DESC` |
+| `include('contactTags', 'contactLists')` | `include=contactTags,contactLists` |
+| `limit(50)` / `offset(100)` | `limit=50` / `offset=100` |
+| `where('search', 'john')` | a top-level param the API defines outside `filters`, such as contacts' `email`, `search`, `listid` or `id_greater` |
+
+Values are normalised for you: booleans become `1`/`0`, backed enums become their value, arrays are
+joined with commas, and `DateTimeInterface` becomes an ISO-8601 string. `FilterOperator` covers the
+operators the API supports (`eq`, `neq`, `lt`, `lte`, `gt`, `gte`, `contains`, `starts_with`).
+
+A `Query` is a `Stringable`, so `(string) $query` still gives you the raw query string.
+
 #### Contacts are walked by id
 
 ActiveCampaign [recommends](https://developers.activecampaign.com/reference/list-all-contacts)
@@ -455,15 +489,36 @@ $response = resolve(ActiveCampaignClientContract::class)
 
 ### Testing your own code
 
-The package uses Laravel's HTTP client, so `Http::fake()` works as usual:
+The package uses Laravel's HTTP client, so `Http::fake()` works as usual. `ActiveCampaignFake`
+saves you from writing base urls and response envelopes by hand:
 
 ```php
-use Illuminate\Support\Facades\Http;
+use Datomatic\ActiveCampaign\Enums\Method;
+use Datomatic\ActiveCampaign\Testing\ActiveCampaignFake;
 
-Http::fake([
-    '*.api-us1.com/api/3/contacts' => Http::response(['contacts' => []]),
+ActiveCampaignFake::fake([
+    'contacts' => ActiveCampaignFake::list('contacts', [
+        ['id' => '1', 'email' => 'john@example.com'],
+    ], total: 42),
+
+    'contacts/1' => ActiveCampaignFake::single('contact', ['id' => '1']),
+
+    'contacts/2' => ActiveCampaignFake::error(['No Result found'], 404),
 ]);
+
+// ... exercise your code ...
+
+ActiveCampaignFake::assertSent(Method::POST, 'contactTags');
+ActiveCampaignFake::assertSentJson(Method::POST, 'contactTags', [
+    'contactTag' => ['contact' => 1, 'tag' => 5],
+]);
+ActiveCampaignFake::assertNotSent(Method::DELETE, 'contacts/*');
+ActiveCampaignFake::assertSentCount(2);
 ```
+
+Paths are relative to `/api/3` and may contain a `*` wildcard. A path you do not list answers with
+an empty `200`, so a test only describes the calls it cares about, and query strings are ignored
+when matching so a paginated call still matches its bare path.
 
 ## Testing
 

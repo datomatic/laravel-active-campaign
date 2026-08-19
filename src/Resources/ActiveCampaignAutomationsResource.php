@@ -14,7 +14,7 @@ class ActiveCampaignAutomationsResource extends ActiveCampaignResource
      */
     protected function responseCast(array $response): array
     {
-        $responseCast = $response['automation'];
+        $responseCast = $response['automation'] ?? [];
 
         unset($responseCast['links']);
 

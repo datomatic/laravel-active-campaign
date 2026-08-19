@@ -64,7 +64,7 @@ class ActiveCampaignTagsResource extends ActiveCampaignResource
      */
     protected function responseCast(array $response): array
     {
-        $responseCast = $response['tag'];
+        $responseCast = $response['tag'] ?? [];
 
         unset($responseCast['links']);
 

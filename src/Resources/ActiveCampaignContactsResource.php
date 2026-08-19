@@ -6,6 +6,7 @@ use Datomatic\ActiveCampaign\Enums\ListStatus;
 use Datomatic\ActiveCampaign\Enums\Method;
 use Datomatic\ActiveCampaign\Exceptions\ActiveCampaignException;
 use Datomatic\ActiveCampaign\Support\ActiveCampaignConfig;
+use Datomatic\ActiveCampaign\Support\Query;
 use Illuminate\Support\LazyCollection;
 
 class ActiveCampaignContactsResource extends ActiveCampaignResource
@@ -24,7 +25,7 @@ class ActiveCampaignContactsResource extends ActiveCampaignResource
      *
      * @return LazyCollection<int, array<string, mixed>>
      */
-    public function lazy(?string $query = null, int $perPage = self::MAX_PER_PAGE): LazyCollection
+    public function lazy(Query|string|null $query = null, int $perPage = self::MAX_PER_PAGE): LazyCollection
     {
         $params = $this->queryParams($query);
 
@@ -339,7 +340,7 @@ class ActiveCampaignContactsResource extends ActiveCampaignResource
      */
     protected function responseCast(array $response): array
     {
-        $responseCast = $response['contact'];
+        $responseCast = $response['contact'] ?? [];
 
         unset($responseCast['links']);
 
