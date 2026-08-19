@@ -33,6 +33,9 @@ abstract class Config
         });
     }
 
+    /**
+     * @return array<array-key, mixed>
+     */
     protected static function getArrayParam(string $param): array
     {
         return self::getParam($param, function (mixed $param, string $paramName) {

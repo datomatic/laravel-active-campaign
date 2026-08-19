@@ -6,7 +6,7 @@ use RuntimeException;
 
 class InvalidConfig extends RuntimeException
 {
-    protected static $configFile = 'active-campaign';
+    protected static string $configFile = 'active-campaign';
 
     public static function missingParam(string $param): self
     {

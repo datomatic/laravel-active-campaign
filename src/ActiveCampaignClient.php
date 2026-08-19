@@ -13,12 +13,15 @@ class ActiveCampaignClient implements ActiveCampaignClientContract
         private readonly PendingRequest $request,
     ) {}
 
+    /**
+     * @param  array<string, mixed>  $data
+     */
     public function send(Method $method, string $url, array $data = []): Response
     {
-        return $this->request->throw()->send(
+        return $this->request->send(
             method: $method->value,
             url: $url,
-            options: ['json' => $data],
+            options: $data === [] ? [] : ['json' => $data],
         );
     }
 }

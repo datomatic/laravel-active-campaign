@@ -2,9 +2,21 @@
 
 namespace Datomatic\ActiveCampaign\Facades;
 
+use Datomatic\ActiveCampaign\Resources\ActiveCampaignAccountContactsResource;
+use Datomatic\ActiveCampaign\Resources\ActiveCampaignAccountsResource;
+use Datomatic\ActiveCampaign\Resources\ActiveCampaignAutomationsResource;
+use Datomatic\ActiveCampaign\Resources\ActiveCampaignContactAutomationsResource;
 use Datomatic\ActiveCampaign\Resources\ActiveCampaignContactsResource;
+use Datomatic\ActiveCampaign\Resources\ActiveCampaignDealsResource;
+use Datomatic\ActiveCampaign\Resources\ActiveCampaignDealStagesResource;
+use Datomatic\ActiveCampaign\Resources\ActiveCampaignFieldOptionsResource;
+use Datomatic\ActiveCampaign\Resources\ActiveCampaignFieldRelsResource;
 use Datomatic\ActiveCampaign\Resources\ActiveCampaignFieldsResource;
 use Datomatic\ActiveCampaign\Resources\ActiveCampaignFieldValuesResource;
+use Datomatic\ActiveCampaign\Resources\ActiveCampaignImportResource;
+use Datomatic\ActiveCampaign\Resources\ActiveCampaignListsResource;
+use Datomatic\ActiveCampaign\Resources\ActiveCampaignNotesResource;
+use Datomatic\ActiveCampaign\Resources\ActiveCampaignPipelinesResource;
 use Datomatic\ActiveCampaign\Resources\ActiveCampaignTagsResource;
 use Illuminate\Support\Facades\Facade;
 
@@ -14,11 +26,23 @@ use Illuminate\Support\Facades\Facade;
  * @method static ActiveCampaignContactsResource contacts()
  * @method static ActiveCampaignFieldValuesResource fieldValues()
  * @method static ActiveCampaignFieldsResource fields()
+ * @method static ActiveCampaignFieldOptionsResource fieldOptions()
+ * @method static ActiveCampaignFieldRelsResource fieldRels()
+ * @method static ActiveCampaignImportResource import()
+ * @method static ActiveCampaignListsResource lists()
+ * @method static ActiveCampaignAutomationsResource automations()
+ * @method static ActiveCampaignContactAutomationsResource contactAutomations()
+ * @method static ActiveCampaignDealsResource deals()
+ * @method static ActiveCampaignDealStagesResource dealStages()
+ * @method static ActiveCampaignPipelinesResource pipelines()
+ * @method static ActiveCampaignAccountsResource accounts()
+ * @method static ActiveCampaignAccountContactsResource accountContacts()
+ * @method static ActiveCampaignNotesResource notes()
  * @method static ActiveCampaignTagsResource tags()
  */
 class ActiveCampaign extends Facade
 {
-    protected static function getFacadeAccessor()
+    protected static function getFacadeAccessor(): string
     {
         return \Datomatic\ActiveCampaign\ActiveCampaign::class;
     }
