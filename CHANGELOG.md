@@ -2,6 +2,12 @@
 
 All notable changes to `laravel-active-campaign` will be documented in this file.
 
+## v2.1.0 - 2026-11-20
+
+Adds PHP 8.6 support (CI now runs on PHP 8.6).
+
+**Full Changelog**: https://github.com/datomatic/laravel-active-campaign/compare/v2.0.0...v2.1.0
+
 ## v2.0.0 - 2026-08-19
 
 Takes the package from "works if you squint" to something publishable as 1.0.
