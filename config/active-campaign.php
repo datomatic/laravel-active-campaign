@@ -3,7 +3,7 @@
 // config for Datomatic/ActiveCampaign
 return [
     /**
-     * Your Active Campaign account URL, without the /api/3 suffix.
+     * Your ActiveCampaign account URL, without the /api/3 suffix.
      * https://<your-account>.api-us1.com
      *
      * More information: https://developers.activecampaign.com/reference/url
@@ -11,7 +11,7 @@ return [
     'base_url' => env('ACTIVE_CAMPAIGN_BASE_URL'),
 
     /**
-     * Your Active Campaign API key
+     * Your ActiveCampaign API key
      *
      * Your API key can be found in your account on the Settings page under the "Developer" tab.
      * Each user in your ActiveCampaign account has their own unique API key.
@@ -36,7 +36,7 @@ return [
 
     /**
      * (optional)
-     * Map your Active Campaign custom field ids to the names you want to use in your code.
+     * Map your ActiveCampaign custom field ids to the names you want to use in your code.
      */
     'custom_fields' => [
         // 'is_email_verified' => 50,
