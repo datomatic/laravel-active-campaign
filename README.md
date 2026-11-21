@@ -1,9 +1,9 @@
 # Laravel wrapper for ActiveCampaign API v3
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/datomatic/laravel-active-campaign.svg?style=flat-square)](https://packagist.org/packages/datomatic/laravel-active-campaign)
-[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/datomatic/laravel-active-campaign/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/datomatic/laravel-active-campaign/actions/workflows/run-tests.yml)
-[![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/datomatic/laravel-active-campaign/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/datomatic/laravel-active-campaign/actions/workflows/fix-php-code-style-issues.yml)
-[![Total Downloads](https://img.shields.io/packagist/dt/datomatic/laravel-active-campaign.svg?style=flat-square)](https://packagist.org/packages/datomatic/laravel-active-campaign)
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/datomatic/laravel-active-campaign.svg?style=for-the-badge)](https://packagist.org/packages/datomatic/laravel-active-campaign)
+[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/datomatic/laravel-active-campaign/run-tests.yml?branch=main&label=tests&color=5FE8B3&style=for-the-badge)](https://github.com/datomatic/laravel-active-campaign/actions/workflows/run-tests.yml)
+[![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/datomatic/laravel-active-campaign/fix-php-code-style-issues.yml?branch=main&label=code%20style&color=5FE8B3&style=for-the-badge)](https://github.com/datomatic/laravel-active-campaign/actions/workflows/fix-php-code-style-issues.yml)
+[![Total Downloads](https://img.shields.io/packagist/dt/datomatic/laravel-active-campaign.svg?style=for-the-badge)](https://packagist.org/packages/datomatic/laravel-active-campaign)
 
 A small, explicit Laravel wrapper around the [ActiveCampaign API v3](https://developers.activecampaign.com/reference).
 It builds on Laravel's HTTP client, so you keep timeouts, retries, `Http::fake()` and the rest of the
